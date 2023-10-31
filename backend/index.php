@@ -11,6 +11,7 @@ include('config.php');
       
       <!-- Favicon -->
         <!-- Favicon -->
+
       <link rel="shortcut icon" href="https://templates.iqonic.design/calendify/html/assets/images/favicon.ico" />
       
       <link rel="stylesheet" href="../assets/css/backend.minf700.css?v=1.0.1">
@@ -101,7 +102,7 @@ foreach ($events as $event) {
         echo "    id: '" . $event['id'] . "',";
         echo "    title: '" . $event['message'] . "',";
         echo "    start: '" . $event['startdate'] . 'T'.$event['timing'].'.000Z'."',";
-        //secho "    end: '" .$event['enddate'] .'T'.$event['timing'].'.000Z'."',";
+        echo "    end: '" .$event['startdate'] .'T'.$event['timing'].'.000Z'."',";
         echo "    color: '" .$event['colour'] ."',";
         echo "    notallowed: '" .$event['notallowed'] ."',";
         echo "    timing: '" .$event['timing'] ."',";
@@ -139,6 +140,7 @@ mysqli_close($conn);
                 title: title,
             } 
             //jsonevent['title']=title;
+            //jsonevent['event_id']=info.event.id;
             jsonevent['start']= $(this).find('#schedule-start-date').val();
             jsonevent['end']=$(this).find('#schedule-end-date').val()
             jsonevent["colour"]=color;
@@ -152,7 +154,7 @@ mysqli_close($conn);
                 success: function(response) {
                   // Handle the successful response
                   alert(response);
-                  //location.reload();
+                  location.reload();
                   $('#date-event #schedule-title').val('');
                   $('#date-event #schedule-end-date').val('');
                   $('#date-event #schedule-Notallowed').val('');
@@ -171,7 +173,7 @@ mysqli_close($conn);
     <div id="loading">
           <div id="loading-center">
           </div>
-    </div>==
+    </div>
     <!-- loader END -->
     <!-- Wrapper Start -->
     <div class="wrapper">
@@ -321,6 +323,39 @@ mysqli_close($conn);
     </div>
 
     <!--MODAL -->
+    <style> 
+    .button-group {
+  display: flex;
+  justify-content: space-between;
+}
+button{
+ padding: 8px 10px;
+ border-radius: 5px;
+ border: 0;
+ background-color: royalblue;
+ box-shadow: rgb(0 0 255 / 5%) 0 0 7px;
+ letter-spacing: 1.5px;
+ text-transform: uppercase;
+ font-size: 12px;
+ transition: all .5s ease;
+}
+
+button:hover {
+ letter-spacing: 3px;
+ background-color: hsl(261deg 80% 48%);
+ color: hsl(0, 0%, 100%);
+ box-shadow: rgb(93 24 220) 0px 7px 29px 0px;
+}
+
+button:active {
+ letter-spacing: 3px;
+ background-color: hsl(261deg 80% 48%);
+ color: hsl(0, 0%, 100%);
+ box-shadow: rgb(93 24 220) 0px 0px 0px 0px;
+ transform: translateY(10px);
+ transition: 100ms;
+}
+</style>
 
     <div class="modal fade" id="date-event1" tabindex="-1" role="dialog" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
@@ -367,12 +402,14 @@ mysqli_close($conn);
                                     </div>
                                 </div>
                                 <div class="col-md-12 mt-4">
-                                    <div class="d-flex flex-wrap align-items-ceter justify-content-center">
+                                    <!-- <div class="d-flex flex-wrap align-items-ceter justify-content-center"> -->
+                                    <div class="button">
                                         <!-- <button class="btn btn-primary mr-4" data-dismiss="modal">Cancel</button> -->
-                                        <button class="btn btn-primary mr-4" type="button" id="delete_form">DeleteDay</button>
-                                        <button class="btn btn-primary mr-4" id="editButton" id="EditEvent">EditDay</button> 
-                                        <button class="btn btn-primary mr-4" id="editButton" id="DeleteEvent">DeleteEvent</button> 
-                                        <button class="btn btn-primary mr-4" type="button" id="edit_form">Update</button>
+                                    <div class="button-group">
+                                        <button type="button" id="delete_day">Delete Day</button>
+                                        <button type="button" id="delete_Event">Delete Event</button> 
+                                        <button type="button" id="update_Event">Edit Event</button> 
+                                        <button type="button" id="update_form">Edit Day</button>
                                     </div>
                                 </div>  
                             </div>
@@ -386,7 +423,7 @@ mysqli_close($conn);
     </div>
 
 
-    <!-- Modal -->
+    <!-- Modal
     <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
@@ -432,7 +469,7 @@ mysqli_close($conn);
           </div>
         </div>
       </div>
-    </div>
+    </div> -->
 
     <!-- Wrapper End-->
     <!-- <footer class="iq-footer">
@@ -465,7 +502,7 @@ mysqli_close($conn);
     <!-- app JavaScript -->
     <script src="../assets/js/app.js"></script>
 <script>
-      $('#edit_form').on('click', function() {
+      $('#update_form').on('click', function() {
         var message =$('#schedule-title-sss').val();
         var startdate = $('#schedule-start-sss').val();
         var enddate =$('#schedule-end-sss').val();
@@ -493,8 +530,14 @@ $.ajax({
 });
        
 });
-$('#delete_form').on('click', function() {
-        alert("delete click");
+$('#delete_day').on('click', function() {
+        alert("delete day");
+});
+$('#delete_Event').on('click', function() {
+        alert("delete event");
+});
+$('#update_Event').on('click', function() {
+        alert("update event");
 });
 </script>  </body>
 </html>
