@@ -1,0 +1,29 @@
+
+                    <?php
+
+
+  
+
+        $sql = "SELECT title, url, start, color FROM events";
+        $result = mysqli_query($conn, $sql);
+
+        $events = array();
+
+        if (mysqli_num_rows($result) > 0) {
+            while ($row = mysqli_fetch_assoc($result)) {
+                $events[] = $row;
+            }
+        }
+
+        // Output the JavaScript code
+        foreach ($events as $event) {
+            echo "{\n";
+            echo "    title: '" . $event['title'] . "',\n";
+            echo "    url: '" . $event['url'] . "',\n";
+            echo "    start: '" . $event['start'] . "',\n";
+            echo "    color: '" . $event['color'] . "'\n";
+            echo "},\n";
+        }
+
+        mysqli_close($conn);
+        ?>      
