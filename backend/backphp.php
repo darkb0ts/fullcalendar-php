@@ -11,58 +11,66 @@ if (isset($_POST['timing']) && isset($_POST['title'])) {
     $colour=$_POST['colour'];
     $start_date = new DateTime($startdate); //-- set start date 
     $end_date = new DateTime($enddate); //-- set end date 
+    $start_date = new DateTime($startdate);
+    $end_date = new DateTime($enddate);
+    $notallowed = (empty($notallowed)) ? "0000-00-00" : $notallowed;
+    $skip_date = new DateTime($notallowed); 
+    echo print_r($skip_date);
+    $dates = [];
+    $count_insert=0;
+    //echo print_r($start_date),print_r($end_date);
+    //------------------------------------------------------------------------------------------
     $sql ="SELECT MAX(event_id) AS id FROM taskmanager"; // Combines timestamp and 16-character random string
     $result=mysqli_query($conn,$sql);
     if ($result){
         $row = mysqli_fetch_assoc($result);
-        $event_id=$row['id'];
+        $event_id=$row['id'];                                   //-- fetch event id from database and create new id for new event.
         $event_id++;
     }else{
         $event_id=1;
     }
-//echo $uniqueID;
+    //---------------------------------------------------------------------------
 
-    if (!empty($notallowed)){  //
-        $skip_date = new DateTime($notallowed); //-- set skip date 
-    }
-   
-    $period = new DatePeriod($start_date, new DateInterval('P1D'), $end_date); //-- create object for startdate and enddate 
-    //echo $startdate.'T'.$timing.':00.000Z';
-    //echo $notallowed,var_dump($notallowed);
-    //echo $title."&&&".$timing."&&&".$startdate."&&&".$enddate."&&&".$notallowed."&&&".$colour;
-    foreach ($period as $date){
-        $dateinsert=$date->format('Y-m-d').PHP_EOL;
-        echo $dateinsert;
-        if (empty($notallowed)){
-            $sql = "INSERT INTO `taskmanager`( `event_id`,`message`, `startdate`, `enddate`, `notallowed`, `timing`, `colour`) VALUES ('$event_id','$title','$dateinsert','$enddate','0000-00-00','$timing','$colour')";
-            if(mysqli_query($conn, $sql)){
-                continue;
-            }else{
-                echo "Unable to Insert Data";
-            }
-            echo "if working-------";
-        }
-        elseif ($date != $skip_date){
-            echo "not--allowed-working----------------";
+while ($start_date <= $end_date) {
+    $dates[] = $start_date->format('Y-m-d');
+    $start_date->add(new DateInterval('P1D'));
+}
+if(count($dates)>1){
+    foreach ($dates as $date) {
+        $dateinsert=$date . PHP_EOL;
+        
+        if ($date != $skip_date->format('Y-m-d')){
+            //echo "---".$dateinsert."------".$notallowed."<br>";
             $sql = "INSERT INTO `taskmanager`( `event_id`,`message`, `startdate`, `enddate`, `notallowed`, `timing`, `colour`) VALUES ('$event_id','$title','$dateinsert','$enddate','$notallowed','$timing','$colour')";
             if(mysqli_query($conn, $sql)){
-                continue;
+                $count_insert++;
             }else{
                 echo "Unable to Insert Data";
             }
-            echo "elseif working-------";
+        }
+        else{
+            echo print_r($skip_date);
         }
 
     }
-    echo "Sucessfull Insert";
-    mysqli_close($conn);
 }
-// echo $title;
-// $postData = $_POST;                            //!!view the full data in php
-// $jsonData = json_encode($postData);
-// echo $jsonData;
+else{
+    $sql = "INSERT INTO `taskmanager`( `event_id`,`message`, `startdate`, `enddate`, `notallowed`, `timing`, `colour`) VALUES ('$event_id','$title','$startdate','$enddate','$notallowed','$timing','$colour')";
+    if(mysqli_query($conn, $sql)){
+        $count_insert=1;
+    }else{            
+    echo "Unable to Insert Data";
+    }
+}
+if($count_insert==count($dates)){
+    echo "Successful Insert";
+}
+else{
+    echo "Unable to Insert Data";
+}
+mysqli_close($conn);
 } else {
-    // Handle the case where "notallowed" and "timing" are not set in the POST data
     echo "Invalid data received";
+}
 }
 ?>

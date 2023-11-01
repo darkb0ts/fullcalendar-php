@@ -1,5 +1,17 @@
 <?php
-$uniqueID = time() . bin2hex(random_bytes(1)); // Combines timestamp and 16-character random string
-echo $uniqueID;
+
+$start_date = new DateTime('2023-10-01');
+$end_date = new DateTime('2023-10-01');
+
+$dates = [];
+while ($start_date <= $end_date) {
+    $dates[] = $start_date->format('Y-m-d');
+    $start_date->add(new DateInterval('P1D'));
+}
+$arrLength = count($dates);
+echo $arrLength."----";
+foreach ($dates as $date) {
+    echo $date . PHP_EOL."<br>";
+}
 
 ?>

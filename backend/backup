@@ -113,3 +113,43 @@
     // alert('Event: ' + info.event.notallowed);
     // // $('#schedule-start-sss').val(info.event.start)
     // // $('#schedule-end-sss').val(info.dateStr)
+
+    if ($start_date==$end_date){
+        echo "else work of default";
+        $sql = "INSERT INTO `taskmanager`( `event_id`,`message`, `startdate`, `enddate`, `notallowed`, `timing`, `colour`) VALUES ('$event_id','$title','$startdate','$enddate','0000-00-00','$timing','$colour')";
+        if(mysqli_query($conn, $sql)){
+        }else{
+            echo "Unable to Insert Data";
+        }
+    }
+    else{
+        $period = new DatePeriod($start_date, new DateInterval('P1D'), $end_date); //-- create object for startdate and enddate 
+        foreach ($period as $date){
+        $dateinsert=$date->format('Y-m-d').PHP_EOL;
+        //echo $dateinsert;
+        if (empty($notallowed)){
+            $sql = "INSERT INTO `taskmanager`( `event_id`,`message`, `startdate`, `enddate`, `notallowed`, `timing`, `colour`) VALUES ('$event_id','$title','$dateinsert','$enddate','0000-00-00','$timing','$colour')";
+            if(mysqli_query($conn, $sql)){
+                continue;
+            }else{
+                echo "Unable to Insert Data";
+            }
+            echo "if working-------";
+        }
+        else if ($date != $skip_date){
+            echo "not--allowed-working----------------";
+            $sql = "INSERT INTO `taskmanager`( `event_id`,`message`, `startdate`, `enddate`, `notallowed`, `timing`, `colour`) VALUES ('$event_id','$title','$dateinsert','$enddate','$notallowed','$timing','$colour')";
+            if(mysqli_query($conn, $sql)){
+                continue;
+            }else{
+                echo "Unable to Insert Data";
+            }
+            echo "elseif working-------";
+        }
+
+    }
+    }
+
+
+    mysqli_close($conn);
+}
