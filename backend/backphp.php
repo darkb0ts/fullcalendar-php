@@ -1,5 +1,15 @@
 <?php
+/* Database schema  
+id	
+message	
+startdate	
+enddate	
+notallowed	
+timing	
+colour	
+*/
 include("./config.php"); 
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     
 if (isset($_POST['timing']) && isset($_POST['title'])) {
@@ -9,16 +19,23 @@ if (isset($_POST['timing']) && isset($_POST['title'])) {
     $startdate=$_POST['start'];
     $enddate=$_POST['end'];
     $colour=$_POST['colour'];
+    $audioFile = $_FILES['audioFile'];
     $start_date = new DateTime($startdate); //-- set start date 
     $end_date = new DateTime($enddate); //-- set end date 
     $start_date = new DateTime($startdate);
     $end_date = new DateTime($enddate);
     $notallowed = (empty($notallowed)) ? "0000-00-00" : $notallowed;
     $skip_date = new DateTime($notallowed); 
-    echo print_r($skip_date);
     $dates = [];
     $count_insert=0;
-    //echo print_r($start_date),print_r($end_date);
+    $message="";
+    echo json_encode($_POST);
+    //------------------------------------------------------------------------------------------
+    $targetDirectory = "upload/"; // Specify the directory where you want to store the uploaded audio files
+    $targetFile = $targetDirectory . uniqid() . '.' . strtolower(pathinfo($_FILES["audioFile"]["name"], PATHINFO_EXTENSION));
+    $filename=$_FILES["audioFile"]["name"];
+    $uploadOk = 1;
+    $fileType = strtolower(pathinfo($targetFile, PATHINFO_EXTENSION));
     //------------------------------------------------------------------------------------------
     $sql ="SELECT MAX(event_id) AS id FROM taskmanager"; // Combines timestamp and 16-character random string
     $result=mysqli_query($conn,$sql);
@@ -30,43 +47,63 @@ if (isset($_POST['timing']) && isset($_POST['title'])) {
         $event_id=1;
     }
     //---------------------------------------------------------------------------
-
+    if ($fileType != "mp3" && $fileType != "wav" && $fileType != "ogg") {
+        $message="Sorry, only MP3, WAV, and OGG audio files are allowed.";
+        $uploadOk = 0;
+    }else {
+        if (move_uploaded_file($_FILES["audioFile"]["tmp_name"], $targetFile)) {
+            $message="The audio file " . basename($_FILES["audioFile"]["name"]) . " has been uploaded";
+            //echo "The audio file " . basename($_FILES["audioFile"]['tmp_name']);
+        } else {
+            $uploadOk = 0;
+            $message="Sorry, there was an error uploading your audio file.";
+        }
+    }
+    //------------------------------------------------------------------------------------------
 while ($start_date <= $end_date) {
     $dates[] = $start_date->format('Y-m-d');
     $start_date->add(new DateInterval('P1D'));
 }
-if(count($dates)>1){
+$dates_count=count($dates);
+if($dates_count>1){
+    
     foreach ($dates as $date) {
         $dateinsert=$date . PHP_EOL;
         
-        if ($date != $skip_date->format('Y-m-d')){
+        if ($date != $skip_date->format('Y-m-d') && $uploadOk==1){
             //echo "---".$dateinsert."------".$notallowed."<br>";
-            $sql = "INSERT INTO `taskmanager`( `event_id`,`message`, `startdate`, `enddate`, `notallowed`, `timing`, `colour`) VALUES ('$event_id','$title','$dateinsert','$enddate','$notallowed','$timing','$colour')";
+            $sql = "INSERT INTO `taskmanager`( `event_id`,`message`, `startdate`, `enddate`, `notallowed`, `timing`, `colour`,`audio`,`audioname`) VALUES ('$event_id','$title','$dateinsert','$enddate','$notallowed','$timing','$colour','$targetFile','$filename')";
             if(mysqli_query($conn, $sql)){
-                $count_insert++;
+                ++$count_insert;
+                //echo $count_insert."-";
             }else{
-                echo "Unable to Insert Data";
+                echo "Unable to Insert";
             }
         }
         else{
-            echo print_r($skip_date);
+            $dates_count-=1;
         }
-
     }
 }
 else{
-    $sql = "INSERT INTO `taskmanager`( `event_id`,`message`, `startdate`, `enddate`, `notallowed`, `timing`, `colour`) VALUES ('$event_id','$title','$startdate','$enddate','$notallowed','$timing','$colour')";
+    $notallowed="0000-00-00";
+    $sql = "INSERT INTO `taskmanager`( `event_id`,`message`, `startdate`, `enddate`, `notallowed`, `timing`, `colour`,`audio`,`audioname`) VALUES ('$event_id','$title','$startdate','$enddate','$notallowed','$timing','$colour','$targetFile','$filename')";
     if(mysqli_query($conn, $sql)){
         $count_insert=1;
+        
+        echo $message." and Successful Insert";
+        mysqli_close($conn);
+        return ;
     }else{            
     echo "Unable to Insert Data";
     }
 }
-if($count_insert==count($dates)){
-    echo "Successful Insert";
+if($count_insert==$dates_count){
+    echo $message." and Successful Insert";
 }
 else{
-    echo "Unable to Insert Data";
+    echo "@--".$count_insert."----".count($dates)."--@";
+    echo $message." and Unable to Insert Datas";
 }
 mysqli_close($conn);
 } else {

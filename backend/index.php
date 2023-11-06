@@ -56,17 +56,28 @@ include('config.php');
                     const jsonObject = JSON.parse(response);
                     //console.log(jsonObject);
                     const id=jsonObject[0].id;
+                    const event_id = jsonObject[0].event_id;
                     const mes= jsonObject[0].message;
                     const startdate = jsonObject[0].startdate;
                     const enddate = jsonObject[0].enddate;
                     const notallowed = jsonObject[0].notallowed;
                     const times = jsonObject[0].timing;
+                    const colour = jsonObject[0].colour;
+                    const audioName=jsonObject[0].audioname;
+                    const audio=jsonObject[0].audio;
+                    console.log(mes);
                   $('#date-event1 #schedule-title-sss').val(mes);
                   $('#date-event1 #schedule-start-sss').val(startdate);
                   $('#date-event1 #schedule-end-sss').val(enddate);
                   $('#date-event1 #schedule-Notallowed-sss').val(notallowed);
                   $('#date-event1 #schedule-timinigs-sss').val(times);
+                  $('#date-event1 #schedule-color-sss').val(colour);
+                  $('#date-event1 #audioPath').val(audio);
                   $('#edit_id').val(id);
+                  $('#event_id').val(event_id)
+                  $('#showaudio').attr('href', audio);
+                  document.getElementById('showaudio').textContent=audioName;
+                  
                 },
               });
                     $('#date-event1').modal('show')
@@ -124,6 +135,8 @@ mysqli_close($conn);
             const endDate = moment(new Date($(this).find('#schedule-end-date').val()), 'YYYY-MM-DD').format('YYYY-MM-DD') + "T"+$(this).find('#schedule-timinigs').val()+':00.000Z'
             const color = $(this).find('#schedule-color').val()
             const notallowed =$(this).find('#schedule-Notallowed').val()
+            //const audiofile= document.getElementById("audioFile").files[0];
+            //console.log(audiofile);
             
             console.log(startDate, endDate, color,timing)   
             const event = {
@@ -136,21 +149,23 @@ mysqli_close($conn);
             }
             $(this).closest('#date-event').modal('hide')
             calendar1.addEvent(event)
-            const jsonevent = {
-                title: title,
-            } 
-            //jsonevent['title']=title;
-            //jsonevent['event_id']=info.event.id;
-            jsonevent['start']= $(this).find('#schedule-start-date').val();
-            jsonevent['end']=$(this).find('#schedule-end-date').val()
-            jsonevent["colour"]=color;
-            jsonevent["notallowed"]=notallowed;                 //adding notallowed daying
-            jsonevent["timing"]=timing;                        //addind timing
-              //console.log(jsonevent);
+            var formData = new FormData();
+            formData.append("title", title);
+formData.append("start",$(this).find('#schedule-start-date').val());
+formData.append("end", $(this).find('#schedule-end-date').val());
+formData.append("colour",color); //["notallowed"]=notallowed; 
+formData.append("notallowed",notallowed);
+formData.append("timing",timing);
+formData.append("audioFile", $("#audioFile_pop")[0].files[0]);
+// for (var pair of formData.entries()) {
+//     console.log(pair[0] + ': ' + pair[1]);
+// }
               $.ajax({
-                type: 'POST',
+                type: "POST",
                 url: "backphp.php",
-                data: jsonevent,
+                data: formData,
+                processData: false,
+                contentType: false,
                 success: function(response) {
                   // Handle the successful response
                   alert(response);
@@ -165,10 +180,6 @@ mysqli_close($conn);
 
 
         })
-      
-
-      
-      
     </script>
     <div id="loading">
           <div id="loading-center">
@@ -272,7 +283,7 @@ mysqli_close($conn);
                                 <div class="col-md-12">
                                     <div class="form-group">
                                         <label class="form-label" for="schedule-title">Schedule For</label>
-                                        <input class="form-control" placeholder="Enter Title" type="text" name="message" id="schedule-title" required />
+                                        <input class="form-control" placeholder="Enter Title" type="text" name="message" id="schedule-title"  />
                                     </div>
                                 </div>
                                 <div class="col-md-6">
@@ -296,14 +307,21 @@ mysqli_close($conn);
                                  <div class="col-md-6">
                                     <div class="form-group">
                                         <label class="form-label" for="schedule-timinigs">Timings</label><br>
-                                        <input type="Time" span class="fc-time" name="timing" id="schedule-timinigs" required />
+                                        <input type="Time" span class="fc-time" name="timing" id="schedule-timinigs"  />
                                     </div>
                                 </div>
                                 <div class="col-md-12">
                                     <div class="form-group">
-                                        <input class="form-control" type="color" name="title" id="schedule-color" required />
+                                    <label class="form-label" for="audio-file">Audio File</label><br>
+                                    <input type="file" name="audioFile_pop" id="audioFile_pop"  />
                                     </div>
                                 </div>
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <input class="form-control" type="color" name="title" id="schedule-color"  />
+                                    </div>
+                                </div>
+
                                 <div class="col-md-12 mt-4">
                                     <div class="d-flex flex-wrap align-items-ceter justify-content-center">
                                         <button class="btn btn-primary mr-4" data-dismiss="modal">Cancel</button>
@@ -338,6 +356,7 @@ button{
  text-transform: uppercase;
  font-size: 12px;
  transition: all .5s ease;
+ color: white;
 }
 
 button:hover {
@@ -364,6 +383,8 @@ button:active {
                     <div class="popup text-left">
                         <h4 class="mb-3">Edit Message</h4>
                         <input type="hidden" id="edit_id">
+                        <input type="hidden" id="event_id">
+                        <input type="hidden" id="audioPath">
                         <form action="https://templates.iqonic.design/" id="edit-schedule">
                             <div class="content create-workform row">
                                 <div class="col-md-12">
@@ -398,7 +419,15 @@ button:active {
                                 </div>
                                 <div class="col-md-12">
                                     <div class="form-group">
-                                        <input class="form-control" type="color" name="title" id="schedule-color" required />
+                                    <label class="form-label" for="audio-file">Audio File</label><br>
+                                    <input type="file" name="audioFile" id="audioFile" />
+                                    </div>
+                                    <a href="" id="showaudio"></a>
+                                </div>
+                                
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <input class="form-control" type="color" name="title" id="schedule-color-sss" required />
                                     </div>
                                 </div>
                                 <div class="col-md-12 mt-4">
@@ -421,72 +450,6 @@ button:active {
     </div>    
       </div>
     </div>
-
-
-    <!-- Modal
-    <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content">
-          <div class="modal-body">
-            <div class="popup text-left" id="popup">
-                <h4 class="mb-3">Add Action</h4>
-                <div class="content create-workform">
-                    <div class="form-group">
-                      <h6 class="form-label mb-3">Copy Your Link</h6>
-                      <div class="input-group">
-                        <input type="text" class="form-control" readonly value="calendly.com/rickoshea1234">
-                        <div class="input-group-append">
-                          <span class="input-group-text" id="basic-addon2"><i class="las la-link"></i></span>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="form-group">
-                      <h6 class="form-label mb-3">Email Your Link</h6>
-                      <div class="input-group">
-                        <input type="text" class="form-control" readonly value="calendly.com/rickoshea1234">
-                        <div class="input-group-append">
-                          <span class="input-group-text" id="basic-addon3"><i class="las la-envelope"></i></span>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="form-group">
-                      <h6 class="form-label mb-3">Add to Your Website</h6>
-                      <div class="input-group">
-                        <input type="text" class="form-control" readonly value="calendly.com/rickoshea1234">
-                        <div class="input-group-append">
-                          <span class="input-group-text" id="basic-addon4"><i class="las la-code"></i></span>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="col-lg-12 mt-3">
-                        <div class="d-flex flex-wrap align-items-ceter justify-content-center">
-                            <button type="submit" data-dismiss="modal" class="btn btn-primary mr-4">Cancel</button>
-                            <button type="submit" data-dismiss="modal" class="btn btn-outline-primary">Save</button>
-                        </div>
-                    </div>  
-                </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div> -->
-
-    <!-- Wrapper End-->
-    <!-- <footer class="iq-footer">
-        <div class="container-fluid container">
-            <div class="row">
-                <div class="col-lg-6">
-                    <ul class="list-inline mb-0">
-                        <li class="list-inline-item"><a href="privacy-policy.html">Privacy Policy</a></li>
-                        <li class="list-inline-item"><a href="terms-of-service.html">Terms of Use</a></li>
-                    </ul>
-                </div>
-                <div class="col-lg-6 text-right">
-                    Copyright <span id="currentYear"></span> <a href="#"> Calendify</a> All Rights Reserved.
-                </div>
-            </div>
-        </div>
-    </footer> -->
  <script src="../assets/js/backend-bundle.min.js"></script>
     
     <!-- Chart Custom JavaScript -->
@@ -505,39 +468,77 @@ button:active {
       $('#update_form').on('click', function() {
         var message =$('#schedule-title-sss').val();
         var startdate = $('#schedule-start-sss').val();
-        var enddate =$('#schedule-end-sss').val();
-        var notallowed = $('#schedule-timinigs-sss').val();
-        var times = $('#schedule-Notallowed-sss').val();
+        var times = $('#schedule-timinigs-sss').val();
         var edit_id = $('#edit_id').val();
+        var colour_edit=$('#schedule-color-sss').val();
+        var exit_path=$('#audioPath').val();
+        console.log(exit_path);
         // console.log(message,startdate,enddate,notallowed,times,edit_id);
-        // alert(message);
-        var jsonData = {
-  message: message,
-  startdate: startdate,
-  enddate: enddate,
-  notallowed: notallowed,
-  times: times,
-  edit_id: edit_id
-};
+        // alert(message);  formData.append("audioFile", $("#audioFile_pop")[0].files[0]);
+var formData = new FormData();
+formData.append("id", edit_id);
+formData.append("message", message);
+formData.append("colour",colour_edit); //["notallowed"]=notallowed; 
+formData.append("times",times);
+
+var audio_file=$("#audioFile")[0].files[0];
+console.log(audio_file);
+        if(audio_file){
+            formData.append("audioFile", $("#audioFile")[0].files[0]);
+            formData.append("exitpath", exit_path);
+        }else{
+            formData.append("audioFile","");
+            
+        }
+$(this).closest('#date-event1').modal('hide')
 $.ajax({
-  type: "POST",
-  url: "edit&delete.php",
-  data: jsonData,
-  success: function(response) {
-    // Handle the response from the server
-    alert(response);
-  }
-});
+                type: "POST",
+                url: "update_event.php",
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                  alert(response);
+                },
+              });
        
 });
 $('#delete_day').on('click', function() {
-        alert("delete day");
+        var edit_id = $('#edit_id').val();
+        var deletedata={"id":edit_id};
+        $.ajax({
+  type: "POST",
+  url: "delete.php",
+  data: deletedata ,
+  success: function(response) {
+    // Handle the response from the server
+    alert(response);
+    $(this).closest('#date-event1').modal('hide')
+    location.reload();
+  }
+});
 });
 $('#delete_Event').on('click', function() {
-        alert("delete event");
+    var delete_id = $('#edit_id').val();
+    var delete_eventid = $('#event_id').val();
+    // var delete_event={"id":delete_id};
+    // var delete_whole={"event_id":delete_eventid};
+    var jsondelete={eventid:delete_id,delete_event_id:delete_eventid} 
+    $.ajax({
+  type: "POST",
+  url: "delete.php",
+  data: jsondelete ,
+  success: function(response) {
+    // Handle the response from the server
+    alert(response);
+    $(this).closest('#date-event1').modal('hide')
+    location.reload();
+  }
+});
 });
 $('#update_Event').on('click', function() {
         alert("update event");
+        $(this).closest('#date-event1').modal('hide')
 });
 </script>  </body>
 </html>
