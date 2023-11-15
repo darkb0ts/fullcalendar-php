@@ -24,10 +24,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (isset($_POST["eventid"]) && isset($_POST["delete_event_id"])) {
         $delete_id = $_POST["eventid"];
         $delete_event_id = $_POST["delete_event_id"];
-    
+        $filename = $_POST['exitpath'];
+        $delete=0;
+
+if (file_exists($filename)) {
+    if (unlink($filename)) {
+        $delete=1;
+    }
+} 
+
         $sql = "DELETE FROM taskmanager WHERE  event_id = \"$delete_event_id\";";
     
-        if (mysqli_query($conn, $sql)) {
+        if (mysqli_query($conn, $sql) && $delete==1) {
             echo "successfully Data delete";
         } else {
             echo "unable to delete";

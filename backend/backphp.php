@@ -29,7 +29,7 @@ if (isset($_POST['timing']) && isset($_POST['title'])) {
     $dates = [];
     $count_insert=0;
     $message="";
-    echo json_encode($_POST);
+    //echo json_encode($_POST);
     //------------------------------------------------------------------------------------------
     $targetDirectory = "upload/"; // Specify the directory where you want to store the uploaded audio files
     $targetFile = $targetDirectory . uniqid() . '.' . strtolower(pathinfo($_FILES["audioFile"]["name"], PATHINFO_EXTENSION));
@@ -102,7 +102,7 @@ if($count_insert==$dates_count){
     echo $message." and Successful Insert";
 }
 else{
-    echo "@--".$count_insert."----".count($dates)."--@";
+    //echo "@--".$count_insert."----".count($dates)."--@";
     echo $message." and Unable to Insert Datas";
 }
 mysqli_close($conn);

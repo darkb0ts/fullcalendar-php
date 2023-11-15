@@ -1,155 +1,38 @@
-               {
+//     $delete_event_id = $_POST["event_id"];
+    //     $filename = $_POST['exitpath'];
+    //     $notallowed = $_POST['notallowed'];
+    //     $timing = $_POST['times'];
+    //     $title=$_POST['message'];
+    //     $startdate=$_POST['startdate'];
+    //     $enddate=$_POST['enddate'];
+    //     $colour=$_POST['colour'];
+    //     $audioFile = $_FILES['audioFile'];
+    //     $start_date = new DateTime($startdate); //-- set start date 
+    //     $end_date = new DateTime($enddate); //-- set end date 
+    //     $start_date = new DateTime($startdate);
+    //     $end_date = new DateTime($enddate);
+    //     $notallowed = (empty($notallowed)) ? "0000-00-00" : $notallowed;
+    //     $skip_date = new DateTime($notallowed); 
+    //     $dates = [];
+    //     $count_insert=0;
+    //     $message="";
+    //     $delete=0;
+    //     if(!isset($_FILES['audioFile'])){
 
-                        title: 'Click for Google',
-                        url: 'http://google.com/',
-                        start: moment(new Date(), 'YYYY-MM-DD').add(-20, 'days').format('YYYY-MM-DD') + 'T05:30:00.000Z',
-                        color: '#4731b6'
-                    },
-                    {
-                        title: 'All Day Event',
-                        start: moment(new Date(), 'YYYY-MM-DD').add(-18, 'days').format('YYYY-MM-DD') + 'T05:30:00.000Z',
-                        color: '#465af7'
-                    },
-                    {
-                        title: 'Long Event',
-                        start: moment(new Date(), 'YYYY-MM-DD').add(-16, 'days').format('YYYY-MM-DD') + 'T05:30:00.000Z',
-                        end: moment(new Date(), 'YYYY-MM-DD').add(-13, 'days').format('YYYY-MM-DD') + 'T05:30:00.000Z',
-                        color: '#7858d7'
-                    },
-                    {
-                        groupId: '999',
-                        title: 'Repeating Event',
-                        start: moment(new Date(), 'YYYY-MM-DD').add(-14, 'days').format('YYYY-MM-DD') + 'T05:30:00.000Z',
-                        color: '#465af7'
-                    },
-                    {
-                        groupId: '999',
-                        title: 'Repeating Event',
-                        start: moment(new Date(), 'YYYY-MM-DD').add(-12, 'days').format('YYYY-MM-DD') + 'T05:30:00.000Z',
-                        color: '#5baa73'
-                    },
-                    {
-                        groupId: '999',
-                        title: 'Repeating Event',
-                        start: moment(new Date(), 'YYYY-MM-DD').add(-10, 'days').format('YYYY-MM-DD') + 'T05:30:00.000Z',
-                        color: '#01041b'
-                    },
-                    {
-                        title: 'Birthday Party',
-                        start: moment(new Date(), 'YYYY-MM-DD').add(-8, 'days').format('YYYY-MM-DD') + 'T05:30:00.000Z',
-                        color: '#4731b6'
-                    },
-                    {
-                        title: 'Meeting',
-                        start: moment(new Date(), 'YYYY-MM-DD').add(-6, 'days').format('YYYY-MM-DD') + 'T05:30:00.000Z',
-                        color: '#15ca92'
-                    },
-                    {
-                        title: 'Birthday Party',
-                        start: moment(new Date(), 'YYYY-MM-DD').add(-5, 'days').format('YYYY-MM-DD') + 'T05:30:00.000Z',
-                        color: '#f4a965'
-                    },
-                    {
-                        title: 'PRASANNA CANDYMAN',
-                        start: moment(new Date(), 'YYYY-MM-DD').add(-2, 'days').format('YYYY-MM-DD') + 'T05:30:00.000Z',
-                        color: '#ea643f'
-                    },
+    //     }
+    //     else{
+    //         if (file_exists($filename)) {
+    //             if (unlink($filename)) {
+    //                 $delete=1;
+    //             }
+    //             $sql = "UPDATE taskmanager SET audio='$targetFile', audioname='$filename' WHERE id = $id";
+    
+    //             if (mysqli_query($conn, $sql) && $delete==1) {
+    //                 echo "sccc";
+    //             }
+        
+    //             mysqli_close($conn); 
+    //     }
+    // } 
 
-                    {
-                        title: 'Meeting',
-                        start: moment(new Date(), 'YYYY-MM-DD').add(0, 'days').format('YYYY-MM-DD'),
-                        color: '#15ca92'
-                    },
-                    {
-                        title: 'Click for Google',
-                        url: 'http://google.com/',
-                        start: moment(new Date(), 'YYYY-MM-DD').add(0, 'days').format('YYYY-MM-DD'),
-                        color: '#4731b6'
-                    },
-                    {
-                        groupId: '999',
-                        title: 'Repeating Event',
-                        start: moment(new Date(), 'YYYY-MM-DD').add(0, 'days').format('YYYY-MM-DD') + 'T07:30:00.000Z',
-                        color: '#5baa73'
-                    },
-                    {
-                        title: 'PRASANNA CANDYMAN',
-                        start: moment(new Date(), 'YYYY-MM-DD').add(0, 'days').format('YYYY-MM-DD') + 'T08:30:00.000Z',
-                        color: '#f4a965'
-                    },
-                    {
-                        title: 'Doctor Meeting',
-                        start: moment(new Date(), 'YYYY-MM-DD').add(0, 'days').format('YYYY-MM-DD') + 'T05:30:00.000Z',
-                        color: '#f4a965'
-                    },
-                    {
-                        title: 'All Day Event',
-                        start: moment(new Date(), 'YYYY-MM-DD').add(1, 'days').format('YYYY-MM-DD') + 'T05:30:00.000Z',
-                        color: '#465af7'
-                    },
-                    {
-                        groupId: '999',
-                        title: 'Repeating Event',
-                        start: moment(new Date(), 'YYYY-MM-DD').add(8, 'days').format('YYYY-MM-DD') + 'T05:30:00.000Z',
-                        color: '#465af7'
-                    },
-                    {
-                        title: 'CANDYMANSCOBY',
-                        start: moment(new Date(), 'YYYY-MM-DD').add(1, 'days').format('YYYY-MM-DD'),
-                        color: '#465af7'
-                    },
-                    {
-                        groupId: '999',
-                        title: 'Repeating Event',
-                        start: moment(new Date(), 'YYYY-MM-DD').add(10, 'days').format('YYYY-MM-DD') + 'T05:30:00.000Z',
-                        color: '#5baa73'
-                    }
-         console.log(info.event);
-    // alert('Event: ' + info.event.id);
-    // alert('Event: ' + info.event.start);
-    // alert('Event: ' + info.event.end);                   
-    // alert('Event: ' + info.event.title);
-    // alert('Event: ' + info.event.color);
-    // alert('Event: ' + info.event.notallowed);
-    // // $('#schedule-start-sss').val(info.event.start)
-    // // $('#schedule-end-sss').val(info.dateStr)
-
-    if ($start_date==$end_date){
-        echo "else work of default";
-        $sql = "INSERT INTO `taskmanager`( `event_id`,`message`, `startdate`, `enddate`, `notallowed`, `timing`, `colour`) VALUES ('$event_id','$title','$startdate','$enddate','0000-00-00','$timing','$colour')";
-        if(mysqli_query($conn, $sql)){
-        }else{
-            echo "Unable to Insert Data";
-        }
-    }
-    else{
-        $period = new DatePeriod($start_date, new DateInterval('P1D'), $end_date); //-- create object for startdate and enddate 
-        foreach ($period as $date){
-        $dateinsert=$date->format('Y-m-d').PHP_EOL;
-        //echo $dateinsert;
-        if (empty($notallowed)){
-            $sql = "INSERT INTO `taskmanager`( `event_id`,`message`, `startdate`, `enddate`, `notallowed`, `timing`, `colour`) VALUES ('$event_id','$title','$dateinsert','$enddate','0000-00-00','$timing','$colour')";
-            if(mysqli_query($conn, $sql)){
-                continue;
-            }else{
-                echo "Unable to Insert Data";
-            }
-            echo "if working-------";
-        }
-        else if ($date != $skip_date){
-            echo "not--allowed-working----------------";
-            $sql = "INSERT INTO `taskmanager`( `event_id`,`message`, `startdate`, `enddate`, `notallowed`, `timing`, `colour`) VALUES ('$event_id','$title','$dateinsert','$enddate','$notallowed','$timing','$colour')";
-            if(mysqli_query($conn, $sql)){
-                continue;
-            }else{
-                echo "Unable to Insert Data";
-            }
-            echo "elseif working-------";
-        }
-
-    }
-    }
-
-
-    mysqli_close($conn);
-}
+    echo json_encode($_POST);
