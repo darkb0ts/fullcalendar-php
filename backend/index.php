@@ -115,8 +115,8 @@ foreach ($events as $event) {
     echo "{\n";
         echo "    id: '" . $event['id'] . "',";
         echo "    title: '" . $event['message'] . "',";
-        echo "    start: '" . $event['startdate'] . 'T'.$event['timing'].'.000Z'."',";
-        echo "    end: '" .$event['startdate'] .'T'.$event['timing'].'.000Z'."',";
+        echo "    start: '" . $event['startdate'] . 'T'.$event['timing'].'.000Z'."',";  //--start date for default 
+        echo "    end: '" .$event['startdate'] .'T'.$event['timing'].'.000Z'."',";    
         echo "    color: '" .$event['colour'] ."',";
         echo "    notallowed: '" .$event['notallowed'] ."',";
         echo "    timing: '" .$event['timing'] ."',";
@@ -144,10 +144,49 @@ mysqli_close($conn);
             var notallowedvalue = notallowed ? 1 : 0;
             var startDatecheck = new Date(startDate);
             var endDatecheck = new Date(endDate);
-            console.log(notallowedcheck,notallowedvalue);
-            var notallowedcheck="0000-00-00";
+            //console.log(notallowed,notallowedcheck,notallowedvalue,notallowedcheck >= startDatecheck && notallowedcheck <= endDatecheck);
+            //var notallowedcheck="0000-00-00";
             if (notallowedvalue==1 && notallowedcheck >= startDatecheck && notallowedcheck <= endDatecheck) {
                 const event = {
+                title: title,
+                start: startDate,
+                end: endDate,
+                color: color || '#7858d7',
+                time:timing,
+                notallowed: notallowed
+            }
+            $(this).closest('#date-event').modal('hide')
+            calendar1.addEvent(event)
+            var formData = new FormData();
+            formData.append("title", title);
+formData.append("start",$(this).find('#schedule-start-date').val());
+formData.append("end", $(this).find('#schedule-end-date').val());
+formData.append("colour",color); //["notallowed"]=notallowed; 
+formData.append("notallowed",notallowed);
+formData.append("timing",timing);
+formData.append("audioFile", $("#audioFile_pop")[0].files[0]);
+// for (var pair of formData.entries()) {
+//     console.log(pair[0] + ': ' + pair[1]);
+// }
+              $.ajax({
+                type: "POST",
+                url: "backphp.php",
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                  // Handle the successful response
+                  alert(response);
+                  location.reload();
+                  $('#date-event #schedule-title').val('');
+                  $('#date-event #schedule-end-date').val('');
+                  $('#date-event #schedule-Notallowed').val('');
+                  $('#date-event #schedule-timinigs').val('');
+                },
+              });
+}
+else if(notallowedvalue==0){
+    const event = {
                 title: title,
                 start: startDate,
                 end: endDate,
@@ -325,8 +364,8 @@ else{
                                 </div>
                                 <div class="col-md-12">
                                     <div class="form-group">
-                                    <label class="form-label" for="audio-file">Audio File</label><br>
-                                    <input type="file" name="audioFile_pop" id="audioFile_pop"  />
+                                    <label class="form-label" for="audio-file_pop">Audio File</label><br>
+                                    <input type="file" name="audioFile_pop" id="audioFile_pop" required  />
                                     </div>
                                 </div>
                                 <div class="col-md-12">
@@ -433,8 +472,8 @@ button:active {
                                 </div>
                                 <div class="col-md-12">
                                     <div class="form-group">
-                                    <label class="form-label" for="audio-file">Audio File</label><br>
-                                    <input type="file" name="audioFile" id="audioFile"  />
+                                        <label class="form-label" for="audio-file">Audio File</label><br>
+                                        <input type="file" name="audioFile_edit" id="audioFile_edit"/>
                                     </div>
                                     <a href="" id="showaudio"></a>
                                 </div>
@@ -480,14 +519,10 @@ button:active {
     <script src="../assets/js/app.js"></script>
 <script>
     $('#update_Event').on('click', function() {
+        var audioFile = $("#audioFile_edit")[0].files[0];
+
         var formData = new FormData();
-        var dathaving ;
-        var audio_file=$("#audioFile")[0].files[0];
-        if(audio_file){
-            formData.append("audioFile", $("#audioFile")[0].files[0]);    
-        }else{
-            formData.append("audioFile","");   
-        }
+
         formData.append("id",$('#edit_id').val());
 formData.append("event_id",$('#event_id').val());
 formData.append("startdate",$('#schedule-start-sss').val());
@@ -498,25 +533,24 @@ formData.append("message", $('#schedule-title-sss').val());
 formData.append("colour",$('#schedule-color-sss').val());
 formData.append("times",$('#schedule-timinigs-sss').val()); //showaudio
 formData.append("audioname", document.getElementById('showaudio').textContent);
-// console.log($('#showaudio').val());
-for (var pair of formData.entries()) {
-    console.log(pair[0] + ': ' + pair[1]);
+if(audioFile){
+    formData.append("audioFile",audioFile);
+}else{
+    formData.append("audioFile","");
 }
         $(this).closest('#date-event1').modal('hide')
-        const queryString = new URLSearchParams(formData).toString();
-
-// Redirect to the target page with the query parameters
-        window.location.href = "testing.php?" + queryString;
-        // $.ajax({
-        //         type: "POST",
-        //         url: "testing.php",
-        //         data: formData,
-        //         processData: false,
-        //         contentType: false,
-        //         success: function(response) {
-        //             alert(response);
-        //         },
-        //       });
+        
+        $.ajax({
+                type: "POST",
+                url: "updatefull_event.php",
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    alert(response);
+                    location.reload();
+                },
+              });
 });
       $('#update_form').on('click', function() {
         var message =$('#schedule-title-sss').val();
@@ -526,22 +560,21 @@ for (var pair of formData.entries()) {
         var colour_edit=$('#schedule-color-sss').val();
         var exit_path=$('#audioPath').val();
         console.log(exit_path);
-        // console.log(message,startdate,enddate,notallowed,times,edit_id);
-        // alert(message);  formData.append("audioFile", $("#audioFile_pop")[0].files[0]);
+        
+//         
 var formData = new FormData();
 formData.append("id", edit_id);
 formData.append("message", message);
 formData.append("colour",colour_edit); //["notallowed"]=notallowed; 
 formData.append("times",times);
 
-var audio_file=$("#audioFile")[0].files[0];
-console.log(audio_file);
-        if(audio_file){
-            formData.append("audioFile", $("#audioFile")[0].files[0]);
-        }else{
-            formData.append("audioFile","");
-            
-        }
+
+var audioFile=$("#audioFile_edit")[0].files[0];
+if(audioFile){
+    formData.append("audioFile",audioFile);
+}else{
+    formData.append("audioFile","");
+}
 $(this).closest('#date-event1').modal('hide')
 $.ajax({
                 type: "POST",
@@ -550,6 +583,7 @@ $.ajax({
                 processData: false,
                 contentType: false,
                 success: function(response) {
+                    location.reload();
                   alert(response);
                 },
               });
