@@ -1,6 +1,5 @@
 import pygame
 import requests
-import json
 import time
 import RPi.GPIO as GPIO  # Assuming Raspberry Pi GPIO library
 
