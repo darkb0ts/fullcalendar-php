@@ -17,31 +17,28 @@ include("./config.php");
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
-    if(isset($_POST['message']) && isset($_POST['times']) && isset($_POST['id'])){
+    if (isset($_POST['message']) && isset($_POST['times']) && isset($_POST['id'])) {
 
         $timing = $_POST['times'];
 
-        $mes=$_POST['message'];
+        $mes = $_POST['message'];
 
-        $id=$_POST['id'];
+        $id = $_POST['id'];
 
-        $colour=$_POST["colour"];
+        $colour = $_POST["colour"];
 
-        if(!isset($_FILES['audioFile'])){
+        if (!isset($_FILES['audioFile'])) {
 
             $sql = "UPDATE taskmanager SET message='$mes', timing='$timing' , colour='$colour' WHERE id = $id";
 
             if (mysqli_query($conn, $sql)) {
 
                 echo " Record updated successfully.";
-
             } else {
 
                 echo " Error updating record: " . mysqli_error($conn);
-
             }
-
-        }else{
+        } else {
 
             $targetDirectory = "upload/"; // Specify the directory where you want to store the uploaded audio files
 
@@ -49,64 +46,49 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             $uploadOk = 1;
 
-            $filename=$_FILES["audioFile"]["name"];  // get default file name
+            $filename = $_FILES["audioFile"]["name"];  // get default file name
 
             $fileType = strtolower(pathinfo($targetFile, PATHINFO_EXTENSION));
 
             if ($fileType != "mp3" && $fileType != "wav" && $fileType != "ogg") {
 
-                $message="Sorry, only MP3, WAV, and OGG audio files are allowed ";
+                $message = "Sorry, only MP3, WAV, and OGG audio files are allowed ";
 
                 $uploadOk = 0;
-
-            }else {
+            } else {
 
                 if (move_uploaded_file($_FILES["audioFile"]["tmp_name"], $targetFile)) {
 
-                    $message="The audio file " . basename($_FILES["audioFile"]["name"]) . " has been uploaded ";
-
+                    $message = "The audio file " . basename($_FILES["audioFile"]["name"]) . " has been uploaded ";
+                
                 } else {
 
                     $uploadOk = 0;
 
-                    $message="Sorry, there was an error uploading your audio file ";
-
+                    $message = "Sorry, there was an error uploading your audio file ";
                 }
-
             }
 
-            if($uploadOk==1){                    //`audio`,`audioname`
+            if ($uploadOk == 1) {                    //`audio`,`audioname`
 
                 $sql = "UPDATE taskmanager SET message='$mes', timing='$timing' , colour='$colour' , audio='$targetFile', audioname='$filename' WHERE id = $id";
 
                 if (mysqli_query($conn, $sql)) {
 
-                    echo $message ." and Record updated successfully.";
-
+                    echo $message . " and Record updated successfully.";
                 } else {
 
                     echo $message . " Error updating record: " . mysqli_error($conn);
-
                 }
-
-            }else{
+            } else {
 
                 echo "Unable to Set";
-
             }
-
         }
 
         mysqli_close($conn);
-
-    }     
-
-}
-
-else{
+    }
+} else {
 
     echo "Invaild data";
-
 }
-
-?>
