@@ -1,0 +1,3 @@
+rpio.gpio
+requests
+pygame
