@@ -1,6 +1,6 @@
 import subprocess
 
-packages = ["RPi.GPIO", "requests", "pygame"]
+packages = ["RPi.GPIO", "requests", "pygame","pytest"]
 
 for package in packages:
     try:
