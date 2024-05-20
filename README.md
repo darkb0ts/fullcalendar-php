@@ -1,6 +1,6 @@
 # Project Name
 
-Description of your project goes here.
+fullcalendar-php using php and python and html and javascript
 
 ## Getting Started
 
