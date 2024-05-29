@@ -249,13 +249,10 @@ include('config.php');
                 <div class="iq-navbar-custom">
                     <div class="d-flex align-items-center justify-content-between">
                         <div class="iq-navbar-logo d-flex align-items-center justify-content-between">
-
-                            <a href="index.html" class="header-logo">
                                 <img src="./assets/images/logo.png" class="img-fluid rounded-normal light-logo" alt="logo">
                                 <img src="./assets/images/logo-white.png" class="img-fluid rounded-normal darkmode-logo" alt="logo">
                             </a>
                         </div>
-
                         <nav class="navbar navbar-expand-lg navbar-light p-0">
                             <div class="change-mode">
                                 <div class="custom-control custom-switch custom-switch-icon custom-control-indivne">
@@ -292,7 +289,7 @@ include('config.php');
                         </div>
                     </div>
                 </div>
-
+                <div class="content-page">
                 <div class="col-lg-12">
 
                     <div class="d-flex flex-wrap align-items-center justify-content-between my-schedule mb-4">
