@@ -45,6 +45,11 @@
         <button id="plusButton" class="button">+</button>
     </div>
 
+    <div class="button-container">
+        <label> Self Test</label>
+        <button id="selfTest" class="button">Test</button>
+    </div>
+    
     <!-- Send Values Button -->
     <div class="button-container">
         <button id="sendValuesButton" class="button">Submit</button>
@@ -73,6 +78,25 @@
                     count--;
                     $('#counter').text(count);
                 }
+            });
+
+            $('#selfTest').click(function() {
+                const formData = new FormData();
+                formData.append('selftest', 1);
+
+                $.ajax({
+                    url: 'gpio.php',
+                    type: 'POST',
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    success: function(response) {
+                        alert(response);
+                    },
+                    error: function() {
+                        console.error('An error occurred while sending the data');
+                    }
+                });
             });
 
             // Send Values Button
@@ -106,6 +130,8 @@
                 });
             });
         });
+
+
     </script>
 
 </body>

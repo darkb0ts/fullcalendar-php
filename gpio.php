@@ -16,6 +16,10 @@ check the status for Pin
 include("./gpio_database.php");
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
+    if(isset($_POST['selftest']) && $_POST['selftest']==1){
+        echo "hello";
+    }
+
     if (isset($_POST['isToggled']) && isset($_POST['count'])) {
 
         $button_status = htmlspecialchars($_POST['isToggled']);
@@ -28,6 +32,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $start_audio = $_FILES["startaudio"]["name"];
 
         $end_audio = $_FILES["endaudio"]["name"];
+
+        $start_temp = $_FILES["startaudio"]["tmp_name"];
+
+        $end_temp = $_FILES["endaudio"]["tmp_name"];
 
         $First_File = $targetDirectory . uniqid() . '.' . strtolower(pathinfo($start_audio, PATHINFO_EXTENSION));
 
@@ -111,6 +119,5 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         // !! audio off and on using shell_exec
     }
-    // $output = shell_exec('ls'); 
-    // echo "<pre>$output</pre>";
+
 }

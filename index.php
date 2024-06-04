@@ -138,103 +138,80 @@ include('config.php');
         $(document).on("submit", "#submit-schedule", function(e) {
             $('.js-example-basic-single').select2();
             e.preventDefault()
-            const title = $(this).find('#schedule-title').val()
-            const timing = $(this).find('#schedule-timinigs').val()
+            const title = $(this).find('#schedule-title').val() //schedule title message
+            const timing = $(this).find('#schedule-timinigs').val() //schedule time acc
             const startDate = moment(new Date($(this).find('#schedule-start-date').val()), 'YYYY-MM-DD').format('YYYY-MM-DD') + "T" + $(this).find('#schedule-timinigs').val() + ':00.000Z'
             const endDate = moment(new Date($(this).find('#schedule-end-date').val()), 'YYYY-MM-DD').format('YYYY-MM-DD') + "T" + $(this).find('#schedule-timinigs').val() + ':00.000Z'
-            const color = $(this).find('#schedule-color').val()
-            const notallowed = $(this).find('#schedule-Notallowed').val()
-            //const audiofile= document.getElementById("audioFile").files[0];
-            //console.log(audiofile);
-            var notallowedcheck = new Date(notallowed);
-            var notallowedvalue = notallowed ? 1 : 0;
+            const color = $(this).find('#schedule-color').val() //message colour
+            const notallowed = $(this).find('#NotAllowedDate').val() //not allowed date from user
+            //const vaildday = $(this).find(#)                     //vaild day sunday or Monday
+            const splitarray = notallowed.split(','); //split array using comma
+            console.log(splitarray);
+            const formDataArray = [];
+
             var startDatecheck = new Date(startDate);
             var endDatecheck = new Date(endDate);
-            //console.log(notallowed,notallowedcheck,notallowedvalue,notallowedcheck >= startDatecheck && notallowedcheck <= endDatecheck);
-            //var notallowedcheck="0000-00-00";
-            if (notallowedvalue == 1 && notallowedcheck >= startDatecheck && notallowedcheck <= endDatecheck) {
-                const event = {
-                    title: title,
-                    start: startDate,
-                    end: endDate,
-                    color: color || '#7858d7',
-                    time: timing,
-                    notallowed: notallowed
+            for (i = 0; i < splitarray.length; i++) { //check array have vaild date within startdate and endate.
+                try {
+                    var notallowedcheck = new Date(splitarray[i]);
+                    if (!isNaN(notallowedcheck) && notallowedcheck >= startDatecheck && notallowedcheck <= endDatecheck) {
+                        formDataArray.push(splitarray[i]);
+                    }
+                } catch (e) {
+                    console.log("invaild date enter");
                 }
-                $(this).closest('#date-event').modal('hide')
-                calendar1.addEvent(event)
-                var formData = new FormData();
-                formData.append("title", title);
-                formData.append("start", $(this).find('#schedule-start-date').val());
-                formData.append("end", $(this).find('#schedule-end-date').val());
-                formData.append("colour", color); //["notallowed"]=notallowed; 
-                formData.append("notallowed", notallowed);
-                formData.append("timing", timing);
-                formData.append("audioFile", $("#audioFile_pop")[0].files[0]);
-                // for (var pair of formData.entries()) {
-                //     console.log(pair[0] + ': ' + pair[1]);
-                // }
-                $.ajax({
-                    type: "POST",
-                    url: "backphp.php",
-                    data: formData,
-                    processData: false,
-                    contentType: false,
-                    success: function(response) {
-                        // Handle the successful response
-                        alert(response);
-                        location.reload();
-                        $('#date-event #schedule-title').val('');
-                        $('#date-event #schedule-end-date').val('');
-                        $('#date-event #schedule-Notallowed').val('');
-                        $('#date-event #schedule-timinigs').val('');
-                    },
-                });
-            } else if (notallowedvalue == 0) {
-                const event = {
-                    title: title,
-                    start: startDate,
-                    end: endDate,
-                    color: color || '#7858d7',
-                    time: timing,
-                    notallowed: notallowed
-                }
-                $(this).closest('#date-event').modal('hide')
-                calendar1.addEvent(event)
-                var formData = new FormData();
-                formData.append("title", title);
-                formData.append("start", $(this).find('#schedule-start-date').val());
-                formData.append("end", $(this).find('#schedule-end-date').val());
-                formData.append("colour", color); //["notallowed"]=notallowed; 
-                formData.append("notallowed", notallowed);
-                formData.append("timing", timing);
-                formData.append("audioFile", $("#audioFile_pop")[0].files[0]);
-                // for (var pair of formData.entries()) {
-                //     console.log(pair[0] + ': ' + pair[1]);
-                // }
-                $.ajax({
-                    type: "POST",
-                    url: "backphp.php",
-                    data: formData,
-                    processData: false,
-                    contentType: false,
-                    success: function(response) {
-                        // Handle the successful response
-                        alert(response);
-                        location.reload();
-                        $('#date-event #schedule-title').val('');
-                        $('#date-event #schedule-end-date').val('');
-                        $('#date-event #schedule-Notallowed').val('');
-                        $('#date-event #schedule-timinigs').val('');
-                    },
-                });
-            } else {
-                alert("Invaild Not allowed Enter.")
             }
-
-
-
-
+            console.log("formdata:", formDataArray);
+            var checkboxes = document.querySelectorAll('.form-check-input');
+            var checkedValues = [];
+            checkboxes.forEach(function(checkbox) {
+                // Check if the checkbox is checked
+                if (checkbox.checked) {
+                    checkedValues.push(checkbox.value);
+                }
+            });
+            console.log(checkedValues);
+            const event = {
+                title: title,
+                start: startDate,
+                end: endDate,
+                color: color || '#7858d7',
+                time: timing,
+                notallowed: notallowed
+            }
+            $(this).closest('#date-event').modal('hide')
+            // calendar1.addEvent(event)
+            var formData = new FormData();
+            formData.append("title", title);
+            formData.append("start", $(this).find('#schedule-start-date').val());
+            formData.append("end", $(this).find('#schedule-end-date').val());
+            formData.append("colour", color); //["notallowed"]=notallowed; 
+            formData.append("notalloweddate", formDataArray);
+            formData.append("timing", timing);
+            formData.append("audioFile", $("#audioFile_pop")[0].files[0]);
+            formData.append("days",checkedValues);
+            // alert("Checked values: " + checkedValues.join(', '));
+            if (startDatecheck <= endDatecheck){
+                $.ajax({
+                type: "POST",
+                url: "backphp.php",
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    // Handle the successful response
+                    alert(response);
+                    location.reload();
+                    $('#date-event #schedule-title').val('');
+                    $('#date-event #schedule-end-date').val('');
+                    $('#date-event #schedule-Notallowed').val('');
+                    $('#date-event #schedule-timinigs').val('');
+                },
+            });
+            }
+            else{
+                alert("Invaild Date Enter");
+            }
         })
     </script>
     <div id="loading">
@@ -249,8 +226,8 @@ include('config.php');
                 <div class="iq-navbar-custom">
                     <div class="d-flex align-items-center justify-content-between">
                         <div class="iq-navbar-logo d-flex align-items-center justify-content-between">
-                                <img src="./assets/images/logo.png" class="img-fluid rounded-normal light-logo" alt="logo">
-                                <img src="./assets/images/logo-white.png" class="img-fluid rounded-normal darkmode-logo" alt="logo">
+                            <img src="./assets/images/logo.png" class="img-fluid rounded-normal light-logo" alt="logo">
+                            <img src="./assets/images/logo-white.png" class="img-fluid rounded-normal darkmode-logo" alt="logo">
                             </a>
                         </div>
                         <nav class="navbar navbar-expand-lg navbar-light p-0">
@@ -290,112 +267,145 @@ include('config.php');
                     </div>
                 </div>
                 <div class="content-page">
-                <div class="col-lg-12">
+                    <div class="col-lg-12">
 
-                    <div class="d-flex flex-wrap align-items-center justify-content-between my-schedule mb-4">
-                        <div class="d-flex align-items-center justify-content-between">
-                            <div class="form-group mb-0">
+                        <div class="d-flex flex-wrap align-items-center justify-content-between my-schedule mb-4">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="form-group mb-0">
 
-                            </div>
-                            <div class="select-dropdown input-prepend input-append">
-                                <div class="btn-group">
+                                </div>
+                                <div class="select-dropdown input-prepend input-append">
+                                    <div class="btn-group">
 
-                                    <ul class="dropdown-menu w-100 border-none p-3">
-                                        <li>
-                                            <div class="item mb-2"><i class="ri-pencil-line mr-3"></i>Edit</div>
-                                        </li>
-                                        <li>
-                                            <div class="item"><i class="ri-delete-bin-6-line mr-3"></i>Delete</div>
-                                        </li>
-                                    </ul>
+                                        <ul class="dropdown-menu w-100 border-none p-3">
+                                            <li>
+                                                <div class="item mb-2"><i class="ri-pencil-line mr-3"></i>Edit</div>
+                                            </li>
+                                            <li>
+                                                <div class="item"><i class="ri-delete-bin-6-line mr-3"></i>Delete</div>
+                                            </li>
+                                        </ul>
+                                    </div>
                                 </div>
                             </div>
+                            <div class="create-workform">
+                                <a href="#" data-toggle="modal" data-target="#date-event" class="btn btn-primary pr-5 position-relative">New Schedule<span class="add-btn"><i class="ri-add-line"></i></span></a>
+                            </div>
                         </div>
-                        <div class="create-workform">
-                            <a href="#" data-toggle="modal" data-target="#date-event" class="btn btn-primary pr-5 position-relative">New Schedule<span class="add-btn"><i class="ri-add-line"></i></span></a>
+                        <h4 class="mb-3">Set Your weekly hours</h4>
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <div class="card card-block card-stretch">
+                                    <div class="card-body">
+                                        <div id="calendar1" class="calendar-s"></div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <h4 class="mb-3">Set Your weekly hours</h4>
-                    <div class="row">
-                        <div class="col-lg-12">
-                            <div class="card card-block card-stretch">
-                                <div class="card-body">
-                                    <div id="calendar1" class="calendar-s"></div>
-                                </div>
+                </div>
+            </div>
+            <!-- Modal -->
+            <div class="modal fade" id="date-event" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                        <div class="modal-body">
+                            <div class="popup text-left">
+                                <h4 class="mb-3">Add Message</h4>
+                                <form action="https://templates.iqonic.design/" id="submit-schedule">
+                                    <div class="content create-workform row">
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label class="form-label" for="schedule-title">Schedule For</label>
+                                                <input class="form-control" placeholder="Enter Title" type="text" name="message" id="schedule-title" required />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label class="form-label" for="schedule-start-date">Start Date</label>
+                                                <input type="date" value="09/10/2023" type="text" name="startdate" id="schedule-start-date" required />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label class="form-label" for="schedule-end-date">End Date</label>
+                                                <input type="date" value="2023-011-20" type="text" name="enddate" id="schedule-end-date" required />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label class="form-label" for="schedule-timinigs">Timings</label><br>
+                                                <input type="Time" span class="fc-time" name="timing" id="schedule-timinigs" required />
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label" for="audio-file_pop">Audio File</label><br>
+                                                <input type="file" name="audioFile_pop" id="audioFile_pop" required />
+                                            </div>
+                                        
+                                            <div class="form-group">
+                                                <div class="form-check" style="padding: 0px;">
+                                                    <label>N/A Days: </label>
+                                                    <label class="form-check-label " style="margin-right: 20px;">
+                                                        Sun <input class="form-check-input" style="margin-left: 10px;" type="checkbox" value="Sun" id="flexCheck1">
+                                                    </label>
+                                                    <label class="form-check-label" style="margin-right: 20px;">
+                                                        Mon <input class="form-check-input" style="margin-left: 10px;" type="checkbox" value="Mon" id="flexCheck2">
+                                                    </label>
+                                                    <label class="form-check-label " style="margin-right: 20px;">
+                                                        Tue <input class="form-check-input" style="margin-left: 10px;" type="checkbox" value="Tue" id="flexCheck3">
+                                                    </label>
+                                                    <label class="form-check-label " style="margin-right: 20px;">
+                                                        Wed <input class="form-check-input" style="margin-left: 10px;" type="checkbox" value="Wed" id="flexCheck4">
+                                                    </label>
+                                                    <label class="form-check-label" style="margin-right: 20px;">
+                                                        Thu <input class="form-check-input" style="margin-left: 10px;" type="checkbox" value="Thu" id="flexCheck5">
+                                                    </label>
+                                                    <label class="form-check-label" style="margin-right: 20px;">
+                                                        Fri <input class="form-check-input" style="margin-left: 10px;" type="checkbox" value="Fri" id="flexCheck6">
+                                                    </label>
+                                                    <label class="form-check-label " style="margin-right: 20px;">
+                                                        Sat <input class="form-check-input" style="margin-left: 10px;" type="checkbox" value="Sat" id="flexCheck7">
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <div class="form-check" style="padding: 0px;">
+                                                    <label>N/A Sat: </label>
+                                                    <label class="form-check-label " style="margin-right: 20px;">
+                                                        1 Sat <input class="form-check-input" style="margin-left: 10px;" type="checkbox" value="1_Sat" id="flexCheck8">
+                                                    </label>
+                                                    <label class="form-check-label " style="margin-right: 20px;">
+                                                        3 Sat <input class="form-check-input" style="margin-left: 10px;" type="checkbox" value="3_Sat" id="flexCheck8">
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label" for="schedule-title">Not Allowed Date</label>
+                                                <input class="form-control" placeholder="Enter Date Don't to Want Play Audio" type="text" name="message" id="NotAllowedDate" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <input class="form-control" type="color" name="title" id="schedule-color" />
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-12 mt-4">
+                                            <div class="d-flex flex-wrap align-items-ceter justify-content-center">
+                                                <button class="btn btn-primary mr-4" data-dismiss="modal">Cancel</button>
+                                                <!-- <button class="btn btn-primary mr-4" data-dismiss="modal">Delete</button> -->
+                                                <button class="btn btn-outline-primary mr-4" type="submit">Save</button>
+                                                <!-- <button class="btn btn-primary mr-4" id="editButton" data-dismiss="modal">Edit</button> -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <!-- Modal -->
-        <div class="modal fade" id="date-event" tabindex="-1" role="dialog" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered" role="document">
-                <div class="modal-content">
-                    <div class="modal-body">
-                        <div class="popup text-left">
-                            <h4 class="mb-3">Add Message</h4>
-                            <form action="https://templates.iqonic.design/" id="submit-schedule">
-                                <div class="content create-workform row">
-                                    <div class="col-md-12">
-                                        <div class="form-group">
-                                            <label class="form-label" for="schedule-title">Schedule For</label>
-                                            <input class="form-control" placeholder="Enter Title" type="text" name="message" id="schedule-title" required />
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label class="form-label" for="schedule-start-date">Start Date</label>
-                                            <input type="date" value="09/10/2023" type="text" name="startdate" id="schedule-start-date" required />
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label class="form-label" for="schedule-end-date">End Date</label>
-                                            <input type="date" value="2023-011-20" type="text" name="enddate" id="schedule-end-date" required />
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label class="form-label" for="schedule-Notallowed">Not Allowed</label>
-                                            <input type="date" value="2023-011-20" type="text" name="notallowed" id="schedule-Notallowed" />
-
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label class="form-label" for="schedule-timinigs">Timings</label><br>
-                                            <input type="Time" span class="fc-time" name="timing" id="schedule-timinigs" required />
-                                        </div>
-                                    </div>
-                                    <div class="col-md-12">
-                                        <div class="form-group">
-                                            <label class="form-label" for="audio-file_pop">Audio File</label><br>
-                                            <input type="file" name="audioFile_pop" id="audioFile_pop" required />
-                                        </div>
-                                    </div>
-                                    <div class="col-md-12">
-                                        <div class="form-group">
-                                            <input class="form-control" type="color" name="title" id="schedule-color" />
-                                        </div>
-                                    </div>
-
-                                    <div class="col-md-12 mt-4">
-                                        <div class="d-flex flex-wrap align-items-ceter justify-content-center">
-                                            <button class="btn btn-primary mr-4" data-dismiss="modal">Cancel</button>
-                                            <!-- <button class="btn btn-primary mr-4" data-dismiss="modal">Delete</button> -->
-                                            <button class="btn btn-outline-primary mr-4" type="submit">Save</button>
-                                            <!-- <button class="btn btn-primary mr-4" id="editButton" data-dismiss="modal">Edit</button> -->
-                                        </div>
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
     </div>
 
     <!--MODAL -->
@@ -465,31 +475,66 @@ include('config.php');
                                         <input type="date" value="2023-011-20" type="text" name="enddate" id="schedule-end-sss" required />
                                     </div>
                                 </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label class="form-label" for="schedule-Notallowed">Not Allowed</label>
-                                        <input type="date" value="2023-011-20" type="text" name="notallowed" id="schedule-Notallowed-sss" />
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label class="form-label" for="schedule-timinigs">Timings</label><br>
-                                        <input type="Time" span class="fc-time" name="timing" id="schedule-timinigs-sss" required />
-                                    </div>
-                                </div>
                                 <div class="col-md-12">
-                                    <div class="form-group">
-                                        <label class="form-label" for="audio-file">Audio File</label><br>
-                                        <input type="file" name="audioFile_edit" id="audioFile_edit" />
-                                    </div>
-                                    <a href="" id="showaudio"></a>
-                                </div>
-
-                                <div class="col-md-12">
-                                    <div class="form-group">
-                                        <input class="form-control" type="color" name="title" id="schedule-color-sss" required />
-                                    </div>
-                                </div>
+                                            <div class="form-group">
+                                                <label class="form-label" for="schedule-timinigs">Timings</label><br>
+                                                <input type="Time" span class="fc-time" name="timing" id="schedule-timinigs-sss" required />
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label" for="audio-file">Audio File</label><br>
+                                                <input type="file" name="audioFile_edit" id="audioFile_edit" />
+                                            </div>
+                                            <div>
+                                            <a href="" id="showaudio"></a>
+                                            </div>
+                                        
+                                                <div class="form-group">
+                                                <div class="form-check" style="padding: 0px;">
+                                                    <label>N/A Days: </label>
+                                                    <label class="form-check-label " style="margin-right: 20px;">
+                                                        Sun <input class="form-check-input" style="margin-left: 10px;" type="checkbox" value="Sun" id="flexCheck1">
+                                                    </label>
+                                                    <label class="form-check-label" style="margin-right: 20px;">
+                                                        Mon <input class="form-check-input" style="margin-left: 10px;" type="checkbox" value="Mon" id="flexCheck2">
+                                                    </label>
+                                                    <label class="form-check-label " style="margin-right: 20px;">
+                                                        Tue <input class="form-check-input" style="margin-left: 10px;" type="checkbox" value="Tue" id="flexCheck3">
+                                                    </label>
+                                                    <label class="form-check-label " style="margin-right: 20px;">
+                                                        Wed <input class="form-check-input" style="margin-left: 10px;" type="checkbox" value="Wed" id="flexCheck4">
+                                                    </label>
+                                                    <label class="form-check-label" style="margin-right: 20px;">
+                                                        Thu <input class="form-check-input" style="margin-left: 10px;" type="checkbox" value="Thu" id="flexCheck5">
+                                                    </label>
+                                                    <label class="form-check-label" style="margin-right: 20px;">
+                                                        Fri <input class="form-check-input" style="margin-left: 10px;" type="checkbox" value="Fri" id="flexCheck6">
+                                                    </label>
+                                                    <label class="form-check-label " style="margin-right: 20px;">
+                                                        Sat <input class="form-check-input" style="margin-left: 10px;" type="checkbox" value="Sat" id="flexCheck7">
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <div class="form-check" style="padding: 0px;">
+                                                <label>N/A Sat: </label>
+                                                    <label class="form-check-label " style="margin-right: 20px;">
+                                                        1 Sat <input class="form-check-input" style="margin-left: 10px;" type="checkbox" value="1_Sat" id="flexCheck8">
+                                                    </label>
+                                                    <label class="form-check-label " style="margin-right: 20px;">
+                                                        3 Sat <input class="form-check-input" style="margin-left: 10px;" type="checkbox" value="3_Sat" id="flexCheck9">
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label" for="schedule-title">Not Allowed Date</label>
+                                                <input class="form-control" placeholder="Enter Date Don't to Want Play Audio" type="text" name="message" id="schedule-Notallowed-sss" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <input class="form-control" type="color" name="title" id="schedule-color-sss" />
+                                            </div>
+                                        </div>
                                 <div class="col-md-12 mt-4">
                                     <!-- <div class="d-flex flex-wrap align-items-ceter justify-content-center"> -->
                                     <div class="button">
