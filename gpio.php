@@ -16,9 +16,29 @@ check the status for Pin
 include("./gpio_database.php");
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
-    if(isset($_POST['selftest']) && $_POST['selftest']==1){
-        echo "hello";
+    if(isset($_POST['selftest'])){
+        $selftest = $_POST['selftest'];
+
+        if ($selftest == 0){
+            $gpio_message = 'Gpio Staus is On';
+        }
+        else{
+            $gpio_message = 'Gpio Staus is On';
+        }
+
+        $sql = "UPDATE `gpio_setting` SET `selftest` = '$selftest' WHERE `id` = 1";
+
+            if (mysqli_query($conn, $sql)){
+
+                echo $gpio_message;
+                return ;
+            }
+            else{
+                echo 'Something went Wrong. Please Try again';
+                return ;
+            }
     }
+
 
     if (isset($_POST['isToggled']) && isset($_POST['count'])) {
 
@@ -49,7 +69,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         if ($fileType1 != "mp3" && $fileType1 != "wav" && $fileType2 != "mp3" && $fileType2 != "wav") {
 
-            $message = "Sorry, only MP3, WAV, and OGG audio files are allowed.";
+            $message = "Sorry, only MP3, WAV, and OGG audio files are allowed. ";
 
             $uploadOk = 0;
         } else {
@@ -58,7 +78,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
                 // move_uploaded_file($end_audio, $Second_File);
 
-                $message = "The audio file " . $First_File . " has been uploaded";
+                $message = "The audio file " . $First_File . " has been uploaded ";
 
                 //echo "The audio file " . basename($_FILES["audioFile"]['tmp_name']);
                 $uploadOk = 1;
@@ -71,15 +91,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
                 $uploadOk = 0;
 
-                $message = "Sorry, there was an error uploading your audio file.";
+                $message = "Sorry, there was an error uploading your audio file. ";
             }
         }
 
         if ($uploadOk) {
 
             $sql = "UPDATE `gpio_setting` 
-        SET `start_audio` = '$start_audio', 
-            `end_audio` = '$end_audio', 
+        SET `start_audio` = '$First_File', 
+            `end_audio` = '$Second_File', 
             `button_status` = '$button_status', 
             `time_interval` = '$button_time_Interval' 
         WHERE `id` = 1";
@@ -89,17 +109,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $count_insert = 1;
 
 
-                echo $message . " and Successful Insert";
+                echo $message . " and Successful";
 
                 mysqli_close($conn);
 
                 return;
             } else {
-                echo "Unable to Insert Data";
+                echo "Unsucessfull. Please Try again";
             }
         } else {
 
-            echo "Check the Database Connecting";
+            echo "Something Went Wrong. Please Try again";
         }
         // // !! Pin off or On
         // if($button_status){
@@ -118,6 +138,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 
         // !! audio off and on using shell_exec
+    }
+    else{
+        echo "Something Went Wrong. Please Try again";
     }
 
 }

@@ -33,6 +33,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         $end_date = new DateTime($enddate); //-- set end date
         
+        $success_count = 0;
+        
         $date_not_check = (empty($notallowed)) ? "" : array_map('trim',explode(",", $notallowed));
 
         if(!empty($notallowed)){
@@ -96,14 +98,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         if ($fileType != "mp3" && $fileType != "wav" && $fileType != "ogg") {
 
-            $message = "Sorry, only MP3, WAV, and OGG audio files are allowed.";
+            $message = "Sorry, only MP3, WAV, and OGG audio files are allowed. ";
 
             $uploadOk = 0;
         } else {
 
             if (move_uploaded_file($_FILES["audioFile"]["tmp_name"], $targetFile)) {
 
-                $message = "The audio file " . basename($_FILES["audioFile"]["name"]) . " has been uploaded";
+                $message = "The audio file " . basename($_FILES["audioFile"]["name"]) . " has been uploaded ";
 
                 //echo "The audio file " . basename($_FILES["audioFile"]['tmp_name']);
                 $uploadOk = 1;
@@ -112,7 +114,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
                 $uploadOk = 0;
 
-                $message = "Sorry, there was an error uploading your audio file.";
+                $message = "Sorry, there was an error uploading your audio file. ";
             }
         }
 
@@ -120,6 +122,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $formatted_day = substr($start_date->format('l'),0,3); // Get short weekday name (Mon-Sun)
             if (!in_array($formatted_day, $day_check_allowed)) { // Check if the day is in the allowed days array
                 $dates[] = $start_date->format('Y-m-d'); // Add the date to the array
+                $success_count++;
             }
             $start_date->add(new DateInterval('P1D')); // Add one day
         }
@@ -143,8 +146,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         //echo $count_insert."-";
                     } else {
 
-                        echo "Unable to Insert";
-                        break;
+                        echo "Something Went Wrong. Please Try again on Date";
+                        return;
 
                     }
                 } else {
@@ -163,21 +166,26 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
                 $count_insert = 1;
 
+                $uploadOk = 1;
 
-                echo $message . " and Successful Insert";
+                echo $message . " and Successfull";
 
                 mysqli_close($conn);
 
                 return;
             } else {
 
-                echo "Unable to Insert Data";
+                echo "Something Went Wrong. Please Try again";
             }
         }
         mysqli_close($conn);
+        if($uploadOk){
+            echo "Successfull";
+        }
+       
     } else {
 
-        echo "Invalid data received";
+        echo "Please Again";
     }
 }
 

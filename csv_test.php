@@ -47,7 +47,7 @@
 <div class="upload-container">
     <h1>Upload CSV File</h1>
     <form id="uploadForm" enctype="multipart/form-data">
-        <input type="file" name="csvFile" id="csvFile" accept=".csv" required>
+        <input type="file" name="csv_file" id="csv_file" accept=".csv" required>
         <br>
         <button type="button" id="csvupload">Upload</button>
     </form>

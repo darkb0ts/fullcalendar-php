@@ -22,14 +22,13 @@ include('config.php');
     <link rel='stylesheet' href='./assets/vendor/fullcalendar/daygrid/main.css' />
     <link rel='stylesheet' href='./assets/vendor/fullcalendar/timegrid/main.css' />
     <link rel='stylesheet' href='./assets/vendor/fullcalendar/list/main.css' />
+    <link rel='stylesheet' href='./assets/css/custom.css' />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/js/select2.min.js"></script>
 </head>
 
 <body class="fixed-top-navbar top-nav  ">
-    <!-- loader Start -->
-
     <script>
         var calendar1
         document.addEventListener('DOMContentLoaded', function() {
@@ -37,7 +36,7 @@ include('config.php');
 
             calendar1 = new FullCalendar.Calendar(calendarEl, {
                 selectable: true,
-                plugins: ["timeGrid", "dayGrid", "list", "interaction"],
+                plugins: ["timeGrid", "dayGrid", "interaction"],
                 timeZone: "UTC",
                 defaultView: "dayGridMonth",
                 contentHeight: "auto",
@@ -134,7 +133,6 @@ include('config.php');
             });
             calendar1.render();
         });
-
         $(document).on("submit", "#submit-schedule", function(e) {
             $('.js-example-basic-single').select2();
             e.preventDefault()
@@ -144,21 +142,24 @@ include('config.php');
             const endDate = moment(new Date($(this).find('#schedule-end-date').val()), 'YYYY-MM-DD').format('YYYY-MM-DD') + "T" + $(this).find('#schedule-timinigs').val() + ':00.000Z'
             const color = $(this).find('#schedule-color').val() //message colour
             const notallowed = $(this).find('#NotAllowedDate').val() //not allowed date from user
-            //const vaildday = $(this).find(#)                     //vaild day sunday or Monday
-            const splitarray = notallowed.split(','); //split array using comma
-            console.log(splitarray);
             const formDataArray = [];
-
             var startDatecheck = new Date(startDate);
             var endDatecheck = new Date(endDate);
-            for (i = 0; i < splitarray.length; i++) { //check array have vaild date within startdate and endate.
-                try {
-                    var notallowedcheck = new Date(splitarray[i]);
-                    if (!isNaN(notallowedcheck) && notallowedcheck >= startDatecheck && notallowedcheck <= endDatecheck) {
-                        formDataArray.push(splitarray[i]);
+            if (!(notallowed.trim() === "")) {
+                const splitarray = notallowed.split(',');
+                for (i = 0; i < splitarray.length; i++) { //check array have vaild date within startdate and endate.
+                    try {
+                        var notallowedcheck = new Date(splitarray[i].trim());
+                        if (notallowedcheck >= startDatecheck && notallowedcheck <= endDatecheck) {
+                            formDataArray.push(splitarray[i]);
+                        } else {
+                            alert("Invaild Date Enter: Format is [dd/mm/yyyy] ex:[06/11/2024,08/12/2024]");
+                            return;
+                        }
+                    } catch (e) {
+                        alert("Invaild Date Enter: Format is [dd/mm/yyyy] ex:[12/11/2024,08/12/2024]");
+                        return;
                     }
-                } catch (e) {
-                    console.log("invaild date enter");
                 }
             }
             console.log("formdata:", formDataArray);
@@ -189,27 +190,26 @@ include('config.php');
             formData.append("notalloweddate", formDataArray);
             formData.append("timing", timing);
             formData.append("audioFile", $("#audioFile_pop")[0].files[0]);
-            formData.append("days",checkedValues);
+            formData.append("days", checkedValues);
             // alert("Checked values: " + checkedValues.join(', '));
-            if (startDatecheck <= endDatecheck){
+            if (startDatecheck <= endDatecheck) {
                 $.ajax({
-                type: "POST",
-                url: "backphp.php",
-                data: formData,
-                processData: false,
-                contentType: false,
-                success: function(response) {
-                    // Handle the successful response
-                    alert(response);
-                    location.reload();
-                    $('#date-event #schedule-title').val('');
-                    $('#date-event #schedule-end-date').val('');
-                    $('#date-event #schedule-Notallowed').val('');
-                    $('#date-event #schedule-timinigs').val('');
-                },
-            });
-            }
-            else{
+                    type: "POST",
+                    url: "backphp.php",
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function(response) {
+                        // Handle the successful response
+                        alert(response);
+                        location.reload();
+                        $('#date-event #schedule-title').val('');
+                        $('#date-event #schedule-end-date').val('');
+                        $('#date-event #schedule-Notallowed').val('');
+                        $('#date-event #schedule-timinigs').val('');
+                    },
+                });
+            } else {
                 alert("Invaild Date Enter");
             }
         })
@@ -243,8 +243,6 @@ include('config.php');
                                     </div>
                                 </div>
                             </div>
-
-
                     </div>
                 </div>
             </div>
@@ -289,10 +287,11 @@ include('config.php');
                                 </div>
                             </div>
                             <div class="create-workform">
+                                <button class="calendar-settings-btn" onclick="$('#date-event3').modal('show')">Push Button Settings</button>
                                 <a href="#" data-toggle="modal" data-target="#date-event" class="btn btn-primary pr-5 position-relative">New Schedule<span class="add-btn"><i class="ri-add-line"></i></span></a>
                             </div>
                         </div>
-                        <h4 class="mb-3">Set Your weekly hours</h4>
+                        <h4 class="mb-3">Click any Date to Set Schedule</h4>
                         <div class="row">
                             <div class="col-lg-12">
                                 <div class="card card-block card-stretch">
@@ -311,13 +310,13 @@ include('config.php');
                     <div class="modal-content">
                         <div class="modal-body">
                             <div class="popup text-left">
-                                <h4 class="mb-3">Add Message</h4>
+                                <h4 class="mb-3">Add Schedule Date</h4>
                                 <form action="https://templates.iqonic.design/" id="submit-schedule">
                                     <div class="content create-workform row">
                                         <div class="col-md-12">
                                             <div class="form-group">
-                                                <label class="form-label" for="schedule-title">Schedule For</label>
-                                                <input class="form-control" placeholder="Enter Title" type="text" name="message" id="schedule-title" required />
+                                                <label class="form-label" for="schedule-title">Schedule Message For</label>
+                                                <input class="form-control" placeholder="Enter Title Ex:National Day,Birthday.." type="text" name="message" id="schedule-title" required />
                                             </div>
                                         </div>
                                         <div class="col-md-6">
@@ -338,54 +337,64 @@ include('config.php');
                                                 <input type="Time" span class="fc-time" name="timing" id="schedule-timinigs" required />
                                             </div>
                                             <div class="form-group">
-                                                <label class="form-label" for="audio-file_pop">Audio File</label><br>
-                                                <input type="file" name="audioFile_pop" id="audioFile_pop" required />
+                                                <label class="form-label" for="audio-file_pop">Schedule Audio For Announce</label><br>
+                                                <input type="file" name="audioFile_pop" id="audioFile_pop" accept=".mp3,audio/*" required />
                                             </div>
-                                        
+
                                             <div class="form-group">
                                                 <div class="form-check" style="padding: 0px;">
                                                     <label>N/A Days: </label>
-                                                    <label class="form-check-label " style="margin-right: 20px;">
-                                                        Sun <input class="form-check-input" style="margin-left: 10px;" type="checkbox" value="Sun" id="flexCheck1">
-                                                    </label>
-                                                    <label class="form-check-label" style="margin-right: 20px;">
-                                                        Mon <input class="form-check-input" style="margin-left: 10px;" type="checkbox" value="Mon" id="flexCheck2">
-                                                    </label>
-                                                    <label class="form-check-label " style="margin-right: 20px;">
-                                                        Tue <input class="form-check-input" style="margin-left: 10px;" type="checkbox" value="Tue" id="flexCheck3">
-                                                    </label>
-                                                    <label class="form-check-label " style="margin-right: 20px;">
-                                                        Wed <input class="form-check-input" style="margin-left: 10px;" type="checkbox" value="Wed" id="flexCheck4">
-                                                    </label>
-                                                    <label class="form-check-label" style="margin-right: 20px;">
-                                                        Thu <input class="form-check-input" style="margin-left: 10px;" type="checkbox" value="Thu" id="flexCheck5">
-                                                    </label>
-                                                    <label class="form-check-label" style="margin-right: 20px;">
-                                                        Fri <input class="form-check-input" style="margin-left: 10px;" type="checkbox" value="Fri" id="flexCheck6">
-                                                    </label>
-                                                    <label class="form-check-label " style="margin-right: 20px;">
-                                                        Sat <input class="form-check-input" style="margin-left: 10px;" type="checkbox" value="Sat" id="flexCheck7">
-                                                    </label>
+                                                    <span class='box'><label class="form-check-label " style="margin-right: 20px;">
+                                                            Sun <input class="form-check-input" style="margin-left: 10px;" type="checkbox" value="Sun" id="flexCheck1">
+                                                        </label> </span>
+                                                    <span class='box'><label class="form-check-label" style="margin-right: 20px;">
+                                                            Mon <input class="form-check-input" style="margin-left: 10px;" type="checkbox" value="Mon" id="flexCheck2">
+                                                        </label> </span>
+                                                    <span class='box'> <label class="form-check-label " style="margin-right: 20px;">
+                                                            Tue <input class="form-check-input" style="margin-left: 10px;" type="checkbox" value="Tue" id="flexCheck3">
+                                                        </label></span>
+                                                    <span class='box'><label class="form-check-label " style="margin-right: 20px;">
+                                                            Wed <input class="form-check-input" style="margin-left: 10px;" type="checkbox" value="Wed" id="flexCheck4">
+                                                        </label></span>
+                                                    <span class='box'><label class="form-check-label" style="margin-right: 20px;">
+                                                            Thu <input class="form-check-input" style="margin-left: 10px;" type="checkbox" value="Thu" id="flexCheck5">
+                                                        </label></span>
+                                                    <span class='box'><label class="form-check-label" style="margin-right: 20px;">
+                                                            Fri <input class="form-check-input" style="margin-left: 10px;" type="checkbox" value="Fri" id="flexCheck6">
+                                                        </label></span>
+                                                    <span class='box'><label class="form-check-label " style="margin-right: 20px;">
+                                                            Sat <input class="form-check-input" style="margin-left: 10px;" type="checkbox" value="Sat" id="flexCheck7">
+                                                        </label></span>
                                                 </div>
                                             </div>
                                             <div class="form-group">
                                                 <div class="form-check" style="padding: 0px;">
-                                                    <label>N/A Sat: </label>
-                                                    <label class="form-check-label " style="margin-right: 20px;">
-                                                        1 Sat <input class="form-check-input" style="margin-left: 10px;" type="checkbox" value="1_Sat" id="flexCheck8">
-                                                    </label>
-                                                    <label class="form-check-label " style="margin-right: 20px;">
-                                                        3 Sat <input class="form-check-input" style="margin-left: 10px;" type="checkbox" value="3_Sat" id="flexCheck8">
-                                                    </label>
+                                                    <label>N/A Satu: </label>
+                                                    <span class='box'><label class="form-check-label " style="margin-right: 20px;">
+                                                            1 Sat <input class="form-check-input" style="margin-left: 10px;" type="checkbox" value="1_Sat" id="flexCheck8">
+                                                        </label></span>
+                                                    <span class='box'><label class="form-check-label " style="margin-right: 20px;">
+                                                            2 Sat <input class="form-check-input" style="margin-left: 10px;" type="checkbox" value="3_Sat" id="flexCheck8">
+                                                        </label></span>
+                                                    <span class='box'><label class="form-check-label " style="margin-right: 20px;">
+                                                            3 Sat <input class="form-check-input" style="margin-left: 10px;" type="checkbox" value="1_Sat" id="flexCheck8">
+                                                        </label></span>
+                                                    <span class='box'><label class="form-check-label " style="margin-right: 20px;">
+                                                            4 Sat <input class="form-check-input" style="margin-left: 10px;" type="checkbox" value="3_Sat" id="flexCheck8">
+                                                        </label></span>
+                                                    <span class='box'><label class="form-check-label " style="margin-right: 20px;">
+                                                            5 Sat <input class="form-check-input" style="margin-left: 10px;" type="checkbox" value="3_Sat" id="flexCheck8">
+                                                        </label></span>
                                                 </div>
                                             </div>
                                             <div class="form-group">
-                                                <label class="form-label" for="schedule-title">Not Allowed Date</label>
-                                                <input class="form-control" placeholder="Enter Date Don't to Want Play Audio" type="text" name="message" id="NotAllowedDate" />
+                                                <label class="form-label" for="schedule-title">Please Enter Date (Audio Disabled)</label>
+                                                <input class="form-control" placeholder="Enter Date. Do Not Play Audio.(Optional)." type="text" name="message" id="NotAllowedDate" />
                                             </div>
                                         </div>
                                         <div class="col-md-12">
                                             <div class="form-group">
+                                                <label>Select Colour Unique Identification</label>
                                                 <input class="form-control" type="color" name="title" id="schedule-color" />
                                             </div>
                                         </div>
@@ -408,43 +417,8 @@ include('config.php');
         </div>
     </div>
 
-    <!--MODAL -->
-    <style>
-        .button-group {
-            display: flex;
-            justify-content: space-between;
-        }
 
-        button {
-            padding: 8px 10px;
-            border-radius: 5px;
-            border: 0;
-            background-color: royalblue;
-            box-shadow: rgb(0 0 255 / 5%) 0 0 7px;
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
-            font-size: 12px;
-            transition: all .5s ease;
-            color: white;
-        }
-
-        button:hover {
-            letter-spacing: 3px;
-            background-color: hsl(261deg 80% 48%);
-            color: hsl(0, 0%, 100%);
-            box-shadow: rgb(93 24 220) 0px 7px 29px 0px;
-        }
-
-        button:active {
-            letter-spacing: 3px;
-            background-color: hsl(261deg 80% 48%);
-            color: hsl(0, 0%, 100%);
-            box-shadow: rgb(93 24 220) 0px 0px 0px 0px;
-            transform: translateY(10px);
-            transition: 100ms;
-        }
-    </style>
-
+    <!-- popup one -->
     <div class="modal fade" id="date-event1" tabindex="-1" role="dialog" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
@@ -459,8 +433,8 @@ include('config.php');
                             <div class="content create-workform row">
                                 <div class="col-md-12">
                                     <div class="form-group">
-                                        <label class="form-label" for="schedule-title">Schedule For</label>
-                                        <input class="form-control" placeholder="Enter Title" type="text" name="message" id="schedule-title-sss" required />
+                                        <label class="form-label" for="schedule-title">Schedule Message For</label>
+                                        <input class="form-control" placeholder="Enter Title Ex:National Day,Birthday.." type="text" name="message" id="schedule-title-sss" required />
                                     </div>
                                 </div>
                                 <div class="col-md-6">
@@ -476,74 +450,144 @@ include('config.php');
                                     </div>
                                 </div>
                                 <div class="col-md-12">
-                                            <div class="form-group">
-                                                <label class="form-label" for="schedule-timinigs">Timings</label><br>
-                                                <input type="Time" span class="fc-time" name="timing" id="schedule-timinigs-sss" required />
-                                            </div>
-                                            <div class="form-group">
-                                                <label class="form-label" for="audio-file">Audio File</label><br>
-                                                <input type="file" name="audioFile_edit" id="audioFile_edit" />
-                                            </div>
-                                            <div>
+                                    <div class="form-group">
+                                        <label class="form-label" for="schedule-timinigs">Timings</label><br>
+                                        <input type="Time" span class="fc-time" name="timing" id="schedule-timinigs-sss" required />
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" for="audio-file">Audio File</label><br>
+                                        <input type="file" name="audioFile_edit" id="audioFile_edit" accept=".mp3,audio/*" />
+                                    </div>
+                                    <div>
+                                        <div class="form-group">
                                             <a href="" id="showaudio"></a>
-                                            </div>
-                                        
-                                                <div class="form-group">
-                                                <div class="form-check" style="padding: 0px;">
-                                                    <label>N/A Days: </label>
-                                                    <label class="form-check-label " style="margin-right: 20px;">
+                                        </div>
+
+                                        <div class="form-group">
+                                            <div class="form-check" style="padding: 0px;">
+                                                <label>N/A Days: </label>
+                                                <span class='box'><label class="form-check-label " style="margin-right: 20px;">
                                                         Sun <input class="form-check-input" style="margin-left: 10px;" type="checkbox" value="Sun" id="flexCheck1">
-                                                    </label>
-                                                    <label class="form-check-label" style="margin-right: 20px;">
+                                                    </label> </span>
+                                                <span class='box'><label class="form-check-label" style="margin-right: 20px;">
                                                         Mon <input class="form-check-input" style="margin-left: 10px;" type="checkbox" value="Mon" id="flexCheck2">
-                                                    </label>
-                                                    <label class="form-check-label " style="margin-right: 20px;">
+                                                    </label> </span>
+                                                <span class='box'> <label class="form-check-label " style="margin-right: 20px;">
                                                         Tue <input class="form-check-input" style="margin-left: 10px;" type="checkbox" value="Tue" id="flexCheck3">
-                                                    </label>
-                                                    <label class="form-check-label " style="margin-right: 20px;">
+                                                    </label></span>
+                                                <span class='box'><label class="form-check-label " style="margin-right: 20px;">
                                                         Wed <input class="form-check-input" style="margin-left: 10px;" type="checkbox" value="Wed" id="flexCheck4">
-                                                    </label>
-                                                    <label class="form-check-label" style="margin-right: 20px;">
+                                                    </label></span>
+                                                <span class='box'><label class="form-check-label" style="margin-right: 20px;">
                                                         Thu <input class="form-check-input" style="margin-left: 10px;" type="checkbox" value="Thu" id="flexCheck5">
-                                                    </label>
-                                                    <label class="form-check-label" style="margin-right: 20px;">
+                                                    </label></span>
+                                                <span class='box'><label class="form-check-label" style="margin-right: 20px;">
                                                         Fri <input class="form-check-input" style="margin-left: 10px;" type="checkbox" value="Fri" id="flexCheck6">
-                                                    </label>
-                                                    <label class="form-check-label " style="margin-right: 20px;">
+                                                    </label></span>
+                                                <span class='box'><label class="form-check-label " style="margin-right: 20px;">
                                                         Sat <input class="form-check-input" style="margin-left: 10px;" type="checkbox" value="Sat" id="flexCheck7">
-                                                    </label>
-                                                </div>
+                                                    </label></span>
                                             </div>
-                                            <div class="form-group">
-                                                <div class="form-check" style="padding: 0px;">
-                                                <label>N/A Sat: </label>
-                                                    <label class="form-check-label " style="margin-right: 20px;">
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="form-check" style="padding: 0px;">
+                                                <label>N/A Satu: </label>
+                                                <span class='box'><label class="form-check-label " style="margin-right: 20px;">
                                                         1 Sat <input class="form-check-input" style="margin-left: 10px;" type="checkbox" value="1_Sat" id="flexCheck8">
-                                                    </label>
-                                                    <label class="form-check-label " style="margin-right: 20px;">
-                                                        3 Sat <input class="form-check-input" style="margin-left: 10px;" type="checkbox" value="3_Sat" id="flexCheck9">
-                                                    </label>
-                                                </div>
-                                            </div>
-                                            <div class="form-group">
-                                                <label class="form-label" for="schedule-title">Not Allowed Date</label>
-                                                <input class="form-control" placeholder="Enter Date Don't to Want Play Audio" type="text" name="message" id="schedule-Notallowed-sss" />
+                                                    </label></span>
+                                                <span class='box'><label class="form-check-label " style="margin-right: 20px;">
+                                                        2 Sat <input class="form-check-input" style="margin-left: 10px;" type="checkbox" value="3_Sat" id="flexCheck8">
+                                                    </label></span>
+                                                <span class='box'><label class="form-check-label " style="margin-right: 20px;">
+                                                        3 Sat <input class="form-check-input" style="margin-left: 10px;" type="checkbox" value="1_Sat" id="flexCheck8">
+                                                    </label></span>
+                                                <span class='box'><label class="form-check-label " style="margin-right: 20px;">
+                                                        4 Sat <input class="form-check-input" style="margin-left: 10px;" type="checkbox" value="3_Sat" id="flexCheck8">
+                                                    </label></span>
+                                                <span class='box'><label class="form-check-label " style="margin-right: 20px;">
+                                                        5 Sat <input class="form-check-input" style="margin-left: 10px;" type="checkbox" value="3_Sat" id="flexCheck8">
+                                                    </label></span>
                                             </div>
                                         </div>
-                                        <div class="col-md-12">
-                                            <div class="form-group">
-                                                <input class="form-control" type="color" name="title" id="schedule-color-sss" />
+                                        <div class="form-group">
+                                            <label class="form-label" for="schedule-title">Not Allowed Date</label>
+                                            <input class="form-control" placeholder="Enter Date Don't to Want Play Audio" type="text" name="message" id="schedule-Notallowed-sss" />
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <input class="form-control" type="color" name="title" id="schedule-color-sss" />
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12 mt-4">
+                                        <!-- <div class="d-flex flex-wrap align-items-ceter justify-content-center"> -->
+                                        <div class="button">
+                                            <!-- <button class="btn btn-primary mr-4" data-dismiss="modal">Cancel</button> -->
+                                            <div class="button-group">
+                                                <button type="button" id="delete_day">Delete Day</button>
+                                                <button type="button" id="delete_Event">Delete Event</button>
+                                                <!-- <button type="button" id="update_Event">Edit Event</button> -->
+                                                <button type="button" id="update_form">Edit Day</button>
                                             </div>
                                         </div>
-                                <div class="col-md-12 mt-4">
-                                    <!-- <div class="d-flex flex-wrap align-items-ceter justify-content-center"> -->
-                                    <div class="button">
-                                        <!-- <button class="btn btn-primary mr-4" data-dismiss="modal">Cancel</button> -->
-                                        <div class="button-group">
-                                            <button type="button" id="delete_day">Delete Day</button>
-                                            <button type="button" id="delete_Event">Delete Event</button>
-                                            <button type="button" id="update_Event">Edit Event</button>
-                                            <button type="button" id="update_form">Edit Day</button>
+                                    </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+    </div>
+
+
+    <!--Gpio Pop-->
+
+    <div class="modal fade" id="date-event3" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <div class="popup text-left">
+                        <h4 class="mb-3">Add Push Button Setting</h4>
+                        <form id="submit-schedule-gpio">
+                            <div class="content create-workform row"></div>
+                            <div class="form-group">
+                                <label for="audioUpload1">Audio Plays Before Button Press</label>
+                                <input type="file" id="audioUpload1" accept="audio/*">
+                            </div>
+                            <div class="form-group">
+                                <a href="" id="gpiostartaudio"></a>
+                            </div>
+                            <div class="form-group">
+                                <label for="audioUpload2">Audio Plays After Button Press</label>
+                                <input type="file" id="audioUpload2" accept="audio/*">
+                            </div>
+                            <div class="form-group">
+                                <a href="" id="gpioendaudio"></a>
+                            </div>
+                            <div class="form-group">
+                                <span>Play audio twice after pressing</span>
+                                <label class="switch">
+                                    <input type="checkbox" id="playOnce" checked>
+                                    <span class="slider round"></span>
+                                </label>
+                                <div>
+                                    <div class="form-group">
+                                        <div>
+                                            <label>Time Interval Between Two Audio :</label>
+                                            <button type="button" id="minusButton" class="button">-</button>
+                                            <span id="counter">0</span>
+                                            <button type="button" id="plusButton" class="button">+</button>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label> Self Test : </label>
+                                        <button type="button" id="selfTest">Test</button>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="button-container" style="justify-content: center;">
+                                            <button class="btn btn-primary mr-4" data-dismiss="modal">Cancel</button>
+                                            <button type="button" id="sendValuesButton" class="button">Submit</button>
                                         </div>
                                     </div>
                                 </div>
@@ -553,8 +597,9 @@ include('config.php');
             </div>
         </div>
     </div>
-    </div>
-    </div>
+    <!--Gpio Pop-->
+
+
     <script src="./assets/js/backend-bundle.min.js"></script>
 
     <!-- Chart Custom JavaScript -->
@@ -571,6 +616,117 @@ include('config.php');
     <!-- app JavaScript -->
     <script src="./assets/js/app.js"></script>
     <script>
+        let count =0;
+        $(document).ready(function() {
+            $.ajax({
+                url: "gpio_api.php",
+                dataType: "json",
+                success: function(data) {
+                    const gpioData = data[0]; // Assuming data is an array and we need the first object
+                    const gpio_startaudio = gpioData.start_audio; // Correct key based on your API response
+                    const gpio_endaudio = gpioData.end_audio;
+                    const gpio_twicestatus = gpioData.button_status;
+                    const gpio_timeinterval = gpioData.time_interval;
+                    count = gpio_timeinterval; 
+                    $("#gpioendaudio").attr("href", gpio_endaudio).text(gpio_endaudio);
+                    $("#gpiostartaudio").attr("href", gpio_startaudio).text(gpio_startaudio);
+                    $("#playOnce").prop("checked", gpio_twicestatus === "1");
+                    $("#counter").text(gpio_timeinterval);
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    console.error("Error fetching data:", textStatus, errorThrown);
+                }
+            });
+        });
+        var toggleValue = 0;
+        $(document).ready(function() {
+            $("#playOnce").change(function() {
+                var toggleValue = $(this).prop("checked") ? 1 : 0;
+                // Use toggleValue here, for example, store it in a hidden input or send it to the server
+                console.log("Toggle value:", toggleValue);
+            });
+        });
+        $('#minusButton').click(function() {
+            if (count > 0) {
+                count--;
+                $('#counter').text(count);
+            }
+        });
+        $('#plusButton').click(function() {
+            count++;
+            $('#counter').text(count);
+        });
+        $('#sendValuesButton').click('click', function() {
+            const formData = new FormData();
+            formData.append('isToggled', toggleValue);
+            formData.append('count', count);
+
+            const audioUpload1 = $('#audioUpload1')[0].files[0];
+            const audioUpload2 = $('#audioUpload2')[0].files[0];
+            console.log(toggleValue, count, audioUpload1, audioUpload2);
+            formData.append('startaudio', audioUpload1);
+            formData.append('endaudio', audioUpload2);
+            if (audioUpload1) {
+                formData.append('startaudio', audioUpload1);
+            }
+            if (audioUpload2) {
+                formData.append('endaudio', audioUpload2);
+            }
+
+            console.log("data", formData);
+            $.ajax({
+                url: 'gpio.php',
+                type: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function(response) {
+                    alert(response);
+                    location.reload();
+                },
+                error: function() {
+                    console.error('An error occurred while sending the data');
+                }
+            });
+        });
+        $(document).ready(function() {
+            $("#selfTest").click(function() {
+                const formData = new FormData();
+                formData.append('selftest', 1);
+                console.log("Done");
+                $.ajax({
+                    url: 'gpio.php',
+                    type: 'POST',
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    success: function(response) {
+                        console.log("First Ajax call")
+                    },
+                    error: function() {
+                        console.error('An error occurred while sending the data');
+                    }
+                });
+                setTimeout(function() {
+                    const formData1 = new FormData();
+                    formData1.append('selftest', 0);
+                    $.ajax({
+                        url: 'gpio.php',
+                        type: 'POST',
+                        data: formData1,
+                        contentType: false,
+                        processData: false,
+                        success: function(response) {
+                            alert(response);
+                        },
+                        error: function() {
+                            console.error('An error occurred while sending the data');
+                        }
+                    });
+                }, 2000);
+            });
+        });
+
         $('#update_Event').on('click', function() {
             var audioFile = $("#audioFile_edit")[0].files[0];
 
