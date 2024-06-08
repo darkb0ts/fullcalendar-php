@@ -15,49 +15,50 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (isset($_POST['timing']) && isset($_POST['title'])) {
         //echo json_encode($_POST);
         
-        $notallowed = $_POST['notalloweddate'];
+        $notallowed = $_POST['notalloweddate'];  //not Applicable Date for date no need Insert ex[06/11/2024,08/23/2024]
         
-        $timing = $_POST['timing'];
+        $timing = $_POST['timing'];          //get time
 
-        $title = $_POST['title'];
+        $title = $_POST['title'];            //schedule message or title 
 
-        $startdate = $_POST['start'];
+        $startdate = $_POST['start'];       //get start date
 
-        $enddate = $_POST['end'];
+        $enddate = $_POST['end'];            //get end date
 
-        $colour = $_POST['colour'];
+        $colour = $_POST['colour'];         //get colur 
 
-        $audioFile = $_FILES['audioFile'];
+        $audioFile = $_FILES['audioFile'];     //single audio from add message 
 
-        $start_date = new DateTime($startdate); //-- set start date 
+        $day_not_allowed = $_POST['days'];      // get not applicable day like [sun,sat,mon]
 
-        $end_date = new DateTime($enddate); //-- set end date
+        $saturday_check = json_decode($_POST['sat_day'], true);    //five saturday 1 mean 1 saturday and 2 mean 2 saturday and 3 mean 4 saturday 
+
+        $start_date = new DateTime($startdate); //-- set start date datetime module for find inbetween date 
+
+        $end_date = new DateTime($enddate); //-- set end date date datetime module for find inbetween date 
         
-        $success_count = 0;
+        $success_count = 0; // check if sucessfull insert data or Not 
         
-        $date_not_check = (empty($notallowed)) ? "" : array_map('trim',explode(",", $notallowed));
+        $date_not_check = (empty($notallowed)) ? "" : array_map('trim',explode(",", $notallowed)); //value change into array 
 
-        if(!empty($notallowed)){
+        if(!empty($notallowed)){     //if not date is check is not emtpy 
 
             
             $formatted_check_dates = array_map(function($date) {
                 return DateTime::createFromFormat('m/d/Y', $date)->format('Y-m-d');
-            }, $date_not_check);
+            }, $date_not_check); //change day-not-check array into vaild date format 
+        
         }
         else{
-            $formatted_check_dates=array();
+            $formatted_check_dates=array(); //else change into emtpy array
         }
+        if(!empty($day_not_allowed)){
 
-        $notallowed = (empty($notallowed)) ? "" : array($notallowed); //NA chang into array to check the 
-
-        if (is_array($notallowed)) {
-            $notallowed = implode(',',$notallowed);
+            $day_check_allowed =  array_map('trim',explode(",", $day_not_allowed));
         }
-
-        $day_not_allowed = $_POST['days'];
-
-        $day_check_allowed =  array_map('trim',explode(",", $day_not_allowed));
-
+        else{
+            $day_check_allowed = array();
+        }
         $dates = [];
 
         $count_insert = 0;
@@ -65,6 +66,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $message = "";
         
         $owed = 0;
+
+        $sat_count = 0;
+
         //------------------------------------------------------------------------------------------
 
         $targetDirectory = "upload/"; // Specify the directory where you want to store the uploaded audio files
@@ -118,15 +122,31 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }
         }
 
-        while ($start_date <= $end_date) {
-            $formatted_day = substr($start_date->format('l'),0,3); // Get short weekday name (Mon-Sun)
-            if (!in_array($formatted_day, $day_check_allowed)) { // Check if the day is in the allowed days array
-                $dates[] = $start_date->format('Y-m-d'); // Add the date to the array
-                $success_count++;
+        while ($start_date < $end_date) {
+            $day_of_month = (int)$start_date->format('d');
+            $day_of_week = (int)$start_date->format('w');
+            $day_abbr = substr($start_date->format('l'),0,3);
+        
+            if ($day_of_month == 1) {
+                $sat_count = 0; 
             }
-            $start_date->add(new DateInterval('P1D')); // Add one day
+        
+            if ($day_of_week == 6) {
+                $sat_count++;
+                if (in_array($sat_count, $saturday_check)) {
+                    $start_date->add(new DateInterval('P1D'));
+                    continue;
+                }
+            }
+        
+            if (!in_array($day_abbr, $day_check_allowed)) {
+                $dates[] = $start_date->format('Y-m-d');
+            }
+        
+            $start_date->add(new DateInterval('P1D'));
         }
-        $dates_count = count($dates);
+        
+        $dates_count = count($dates); //get count from $dates count for check data is insert are not
 
         if ($dates_count >= 2) {
 
@@ -136,7 +156,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $dateinsert = $date . PHP_EOL;
 
                 if (!in_array($date,$formatted_check_dates) && $uploadOk == 1) {
-                    //echo "---".$dateinsert."------".$notallowed."<br>";
 
                     $sql = "INSERT INTO `taskmanager`( `event_id`,`message`, `startdate`, `enddate`, `notallowed`, `timing`, `colour`, `days`,`audio`,`audioname`) VALUES ('$event_id','$title','$dateinsert','$enddate','$notallowed','$timing','$colour','$day_not_allowed','$targetFile','$filename')";
 
@@ -152,7 +171,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     }
                 } else {
 
+                    echo "Something Went Wrong on Database. Please Try again";
                     $dates_count -= 1;
+                    return;
                     
                 }
             }
@@ -169,6 +190,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $uploadOk = 1;
 
                 echo $message . " and Successfull";
+                unset($dates,$formatted_check_dates);
 
                 mysqli_close($conn);
 
@@ -176,16 +198,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             } else {
 
                 echo "Something Went Wrong. Please Try again";
+                unset($dates,$formatted_check_dates);
+                return;
             }
         }
         mysqli_close($conn);
         if($uploadOk){
-            echo "Successfull";
+            echo "New Schedule created successfully ";
+            unset($dates,$formatted_check_dates);
         }
        
     } else {
 
-        echo "Please Again";
+        echo "Please try again later.";
+        unset($dates,$formatted_check_dates);
     }
 }
 

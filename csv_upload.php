@@ -14,6 +14,7 @@ if (isset($_FILES['csv_file'])) {
     exit;
   }
 
+
   // Validate file type
   $allowed_mime_types = ['text/csv', 'application/csv', 'text/plain'];
   if (!in_array($_FILES['csv_file']['type'], $allowed_mime_types)) {

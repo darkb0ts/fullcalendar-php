@@ -171,7 +171,13 @@ include('config.php');
                     checkedValues.push(checkbox.value);
                 }
             });
-            console.log(checkedValues);
+            var checksat = document.querySelectorAll('.form-check-sat');
+            var checksatvalue = [];
+            checksat.forEach(function(checksatdata){
+                if(checksatdata.checked){
+                    checksatvalue.push(checksatdata.value);
+                }
+            })
             const event = {
                 title: title,
                 start: startDate,
@@ -191,6 +197,7 @@ include('config.php');
             formData.append("timing", timing);
             formData.append("audioFile", $("#audioFile_pop")[0].files[0]);
             formData.append("days", checkedValues);
+            formData.append("sat_day",JSON.stringify(checksatvalue));
             // alert("Checked values: " + checkedValues.join(', '));
             if (startDatecheck <= endDatecheck) {
                 $.ajax({
@@ -343,7 +350,7 @@ include('config.php');
 
                                             <div class="form-group">
                                                 <div class="form-check" style="padding: 0px;">
-                                                    <label>N/A Days: </label>
+                                                    <label>Not Applicable Date: </label>
                                                     <span class='box'><label class="form-check-label " style="margin-right: 20px;">
                                                             Sun <input class="form-check-input" style="margin-left: 10px;" type="checkbox" value="Sun" id="flexCheck1">
                                                         </label> </span>
@@ -369,21 +376,21 @@ include('config.php');
                                             </div>
                                             <div class="form-group">
                                                 <div class="form-check" style="padding: 0px;">
-                                                    <label>N/A Satu: </label>
+                                                    <label>Not Applicable Sat: </label>
                                                     <span class='box'><label class="form-check-label " style="margin-right: 20px;">
-                                                            1 Sat <input class="form-check-input" style="margin-left: 10px;" type="checkbox" value="1_Sat" id="flexCheck8">
+                                                            1 Sat <input class="form-check-sat" style="margin-left: 10px;" type="checkbox" value="1" id="flexCheck9">
                                                         </label></span>
                                                     <span class='box'><label class="form-check-label " style="margin-right: 20px;">
-                                                            2 Sat <input class="form-check-input" style="margin-left: 10px;" type="checkbox" value="3_Sat" id="flexCheck8">
+                                                            2 Sat <input class="form-check-sat" style="margin-left: 10px;" type="checkbox" value="2" id="flexCheck10">
                                                         </label></span>
                                                     <span class='box'><label class="form-check-label " style="margin-right: 20px;">
-                                                            3 Sat <input class="form-check-input" style="margin-left: 10px;" type="checkbox" value="1_Sat" id="flexCheck8">
+                                                            3 Sat <input class="form-check-sat" style="margin-left: 10px;" type="checkbox" value="3" id="flexCheck11">
                                                         </label></span>
                                                     <span class='box'><label class="form-check-label " style="margin-right: 20px;">
-                                                            4 Sat <input class="form-check-input" style="margin-left: 10px;" type="checkbox" value="3_Sat" id="flexCheck8">
+                                                            4 Sat <input class="form-check-sat" style="margin-left: 10px;" type="checkbox" value="4" id="flexCheck12">
                                                         </label></span>
                                                     <span class='box'><label class="form-check-label " style="margin-right: 20px;">
-                                                            5 Sat <input class="form-check-input" style="margin-left: 10px;" type="checkbox" value="3_Sat" id="flexCheck8">
+                                                            5 Sat <input class="form-check-sat" style="margin-left: 10px;" type="checkbox" value="5" id="flexCheck13">
                                                         </label></span>
                                                 </div>
                                             </div>
@@ -558,6 +565,10 @@ include('config.php');
                             <div class="form-group">
                                 <a href="" id="gpiostartaudio"></a>
                             </div>
+                            <label class="container">Second Audio
+                                <input type="checkbox" checked="checked">
+                                <span class="checkmark"></span>
+                            </label>
                             <div class="form-group">
                                 <label for="audioUpload2">Audio Plays After Button Press</label>
                                 <input type="file" id="audioUpload2" accept="audio/*">
