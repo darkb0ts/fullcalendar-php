@@ -1,18 +1,4 @@
 <?php
-/*
-
-upload [First audio] before playing audio and [Second audio] after upload audio 
-
-button of ON and Off the Gpio
-
-set Time Interval for after playing  [1,30,22]
-
-check the status for Pin 
-
-
-*/
-
-
 include("./gpio_database.php");
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
@@ -53,6 +39,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         $end_audio = $_FILES["endaudio"]["name"];
 
+        $middle_audio = isset($_FILES['middleaudio']['name']) ?  $_FILES['middleaudio']['name'] : "";
+
         $start_temp = $_FILES["startaudio"]["tmp_name"];
 
         $end_temp = $_FILES["endaudio"]["tmp_name"];
@@ -60,6 +48,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $First_File = $targetDirectory . uniqid() . '.' . strtolower(pathinfo($start_audio, PATHINFO_EXTENSION));
 
         $Second_File = $targetDirectory . uniqid() . '.' . strtolower(pathinfo($end_audio, PATHINFO_EXTENSION));
+
+        $Third_File = "";
+
+        if(!empty($middle_audio)){
+
+            $Third_File = $targetDirectory.  uniqid(). '.' . strtolower(pathinfo($middle_audio, PATHINFO_EXTENSION));
+
+        }
+        else{
+
+            $Third_File = "";            
+
+        }
 
         $uploadOk = 1;
 
@@ -76,18 +77,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             if (move_uploaded_file($_FILES["startaudio"]["tmp_name"], $First_File)) {
 
-                // move_uploaded_file($end_audio, $Second_File);
-
                 $message = "The audio file " . $First_File . " has been uploaded ";
 
-                //echo "The audio file " . basename($_FILES["audioFile"]['tmp_name']);
                 $uploadOk = 1;
+
             }
 
             if (move_uploaded_file($_FILES["endaudio"]["tmp_name"], $Second_File)) {
 
                 $uploadOk = 1;
-            } else {
+
+                if(!empty($middle_audio)){
+
+                    move_uploaded_file($_FILES["middleaudio"]["tmp_name"], $Third_File);
+                
+                }
+
+            }
+
+             else {
 
                 $uploadOk = 0;
 
@@ -99,7 +107,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             $sql = "UPDATE `gpio_setting` 
         SET `start_audio` = '$First_File', 
-            `end_audio` = '$Second_File', 
+            `end_audio` = '$Second_File',
+            `middle_audio` = '$Third_File', 
             `button_status` = '$button_status', 
             `time_interval` = '$button_time_Interval' 
         WHERE `id` = 1";
@@ -121,23 +130,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             echo "Something Went Wrong. Please Try again";
         }
-        // // !! Pin off or On
-        // if($button_status){
-
-        //     //@@ exec for on the pin
-
-        //     echo $message;
-
-        // }
-        // else{
-
-        //     //@@ exec off the pin
-
-        //     echo $message;
-        // }
-
-
-        // !! audio off and on using shell_exec
     }
     else{
         echo "Something Went Wrong. Please Try again";

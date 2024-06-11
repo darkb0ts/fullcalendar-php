@@ -4806,7 +4806,7 @@ a.close.disabled {
   position: relative;
   flex: 1 1 auto;
   padding: 1rem;
-  width: 70vh;
+  width: 100vh;
 }
 .modal-footer {
   display: flex;

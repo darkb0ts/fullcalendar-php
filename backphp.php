@@ -123,27 +123,27 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
 
         while ($start_date < $end_date) {
-            $day_of_month = (int)$start_date->format('d');
-            $day_of_week = (int)$start_date->format('w');
-            $day_abbr = substr($start_date->format('l'),0,3);
+            $day_of_month = (int)$start_date->format('d');  //get date from like 11,01,12,14
+            $day_of_week = (int)$start_date->format('w');    //get week like saturday or not saturday number is 6
+            $day_abbr = substr($start_date->format('l'),0,3); //get first three char from start date like Mon and Sun Tue
         
-            if ($day_of_month == 1) {
+            if ($day_of_month == 1) {                      //if new month reset the into saturday count is 0
                 $sat_count = 0; 
             }
         
-            if ($day_of_week == 6) {
+            if ($day_of_week == 6) {                       //if saturday match with day range and check 1 sat or 2 sat like in $saturday_check array
                 $sat_count++;
-                if (in_array($sat_count, $saturday_check)) {
-                    $start_date->add(new DateInterval('P1D'));
-                    continue;
+                if (in_array($sat_count, $saturday_check)) {     //if match 1 sat or 2 sat or 3 sat - move to next date
+                    $start_date->add(new DateInterval('P1D'));          //move to next date
+                    continue;  
                 }
             }
         
-            if (!in_array($day_abbr, $day_check_allowed)) {
-                $dates[] = $start_date->format('Y-m-d');
+            if (!in_array($day_abbr, $day_check_allowed)) { // check for day like Sun or Sat and Mon . if not in day check allowed
+                $dates[] = $start_date->format('Y-m-d');        //add into array
             }
         
-            $start_date->add(new DateInterval('P1D'));
+            $start_date->add(new DateInterval('P1D'));    //move into next date
         }
         
         $dates_count = count($dates); //get count from $dates count for check data is insert are not
@@ -153,7 +153,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             foreach ($dates as $date) {
 
-                $dateinsert = $date . PHP_EOL;
+                $dateinsert = $date . PHP_EOL;         //date create only date like 11/06/2000
 
                 if (!in_array($date,$formatted_check_dates) && $uploadOk == 1) {
 
@@ -162,19 +162,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     if (mysqli_query($conn, $sql)) {
 
                         ++$count_insert;
-                        //echo $count_insert."-";
                     } else {
 
                         echo "Something Went Wrong. Please Try again on Date";
                         return;
-
                     }
-                } else {
-
-                    echo "Something Went Wrong on Database. Please Try again";
-                    $dates_count -= 1;
-                    return;
-                    
                 }
             }
         } else {
