@@ -1,2 +1,7 @@
 myvenv
 .vscode
+upload/
+audioBell/
+csvUpload/
+back_test.php
+    

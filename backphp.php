@@ -14,37 +14,51 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if (isset($_POST['timing']) && isset($_POST['title'])) {
         //echo json_encode($_POST);
-
-        $valid_date = [["Saturday", "Sunday"], ["Sunday"], ["Saturday"], ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]]; //@@new feature adding custom data for weekend or sunday to saturday leave
-        /* vaild date is allowed select insert data 
-        [0] - leave sunday and monday
-        [1] - leave sunday only
-        [2] - leave saturday only
-        [3] - leave all working day expect sunday and saturday
-        */
         
-        $notallowed = $_POST['notallowed'];
+        $notallowed = $_POST['notalloweddate'];  //not Applicable Date for date no need Insert ex[06/11/2024,08/23/2024]
         
-        $timing = $_POST['timing'];
+        $timing = $_POST['timing'];          //get time
 
-        $title = $_POST['title'];
+        $title = $_POST['title'];            //schedule message or title 
 
-        $startdate = $_POST['start'];
+        $startdate = $_POST['start'];       //get start date
 
-        $enddate = $_POST['end'];
+        $enddate = $_POST['end'];            //get end date
 
-        $colour = $_POST['colour'];
+        $colour = $_POST['colour'];         //get colur 
 
-        $audioFile = $_FILES['audioFile'];
+        $audioFile = $_FILES['audioFile'];     //single audio from add message 
 
-        $start_date = new DateTime($startdate); //-- set start date 
+        $day_not_allowed = $_POST['days'];      // get not applicable day like [sun,sat,mon]
 
-        $end_date = new DateTime($enddate); //-- set end date 
+        $saturday_check = json_decode($_POST['sat_day'], true);    //five saturday 1 mean 1 saturday and 2 mean 2 saturday and 3 mean 4 saturday 
 
-        $notallowed = (empty($notallowed)) ? "0000-00-00" : $notallowed; //NA chang into array to check the 
+        $start_date = new DateTime($startdate); //-- set start date datetime module for find inbetween date 
 
-        $skip_date = new DateTime($notallowed);  //NA 
+        $end_date = new DateTime($enddate); //-- set end date date datetime module for find inbetween date 
+        
+        $success_count = 0; // check if sucessfull insert data or Not 
+        
+        $date_not_check = (empty($notallowed)) ? "" : array_map('trim',explode(",", $notallowed)); //value change into array 
 
+        if(!empty($notallowed)){     //if not date is check is not emtpy 
+
+            
+            $formatted_check_dates = array_map(function($date) {
+                return DateTime::createFromFormat('m/d/Y', $date)->format('Y-m-d');
+            }, $date_not_check); //change day-not-check array into vaild date format 
+        
+        }
+        else{
+            $formatted_check_dates=array(); //else change into emtpy array
+        }
+        if(!empty($day_not_allowed)){
+
+            $day_check_allowed =  array_map('trim',explode(",", $day_not_allowed));
+        }
+        else{
+            $day_check_allowed = array();
+        }
         $dates = [];
 
         $count_insert = 0;
@@ -52,6 +66,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $message = "";
         
         $owed = 0;
+
+        $sat_count = 0;
+
         //------------------------------------------------------------------------------------------
 
         $targetDirectory = "upload/"; // Specify the directory where you want to store the uploaded audio files
@@ -85,14 +102,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         if ($fileType != "mp3" && $fileType != "wav" && $fileType != "ogg") {
 
-            $message = "Sorry, only MP3, WAV, and OGG audio files are allowed.";
+            $message = "Sorry, only MP3, WAV, and OGG audio files are allowed. ";
 
             $uploadOk = 0;
         } else {
 
             if (move_uploaded_file($_FILES["audioFile"]["tmp_name"], $targetFile)) {
 
-                $message = "The audio file " . basename($_FILES["audioFile"]["name"]) . " has been uploaded";
+                $message = "The audio file " . basename($_FILES["audioFile"]["name"]) . " has been uploaded ";
 
                 //echo "The audio file " . basename($_FILES["audioFile"]['tmp_name']);
                 $uploadOk = 1;
@@ -101,97 +118,92 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
                 $uploadOk = 0;
 
-                $message = "Sorry, there was an error uploading your audio file.";
+                $message = "Sorry, there was an error uploading your audio file. ";
             }
         }
-        //------------------------------------------------------------------------------------------
-        // $adding=1;
-        // while ($start_date <= $end_date) {
-        //     $starting_date=$start_date->format('l');
-        //     foreach ($valid_date[$owed] as $date_check) {
-        //         if($date_check == $starting_date){
-        //             $start_date->add(new DateInterval('P1D'));
-        //             $adding=0;
-        //             break;
-        //         }
-        //     }
-        //     // $dates[] = $start_date->format('Y-m-d');
-        //     if($adding==1){
-        //         $dates[] = $start_date->format('Y-m-d');
-        //         $start_date->add(new DateInterval('P1D'));
-        //         $adding=1;
-        //     }
 
-        // }
-        while ($start_date <= $end_date) {
-
-            $dates[] = $start_date->format('Y-m-d');
-
-            $start_date->add(new DateInterval('P1D'));
+        while ($start_date < $end_date) {
+            $day_of_month = (int)$start_date->format('d');  //get date from like 11,01,12,14
+            $day_of_week = (int)$start_date->format('w');    //get week like saturday or not saturday number is 6
+            $day_abbr = substr($start_date->format('l'),0,3); //get first three char from start date like Mon and Sun Tue
+        
+            if ($day_of_month == 1) {                      //if new month reset the into saturday count is 0
+                $sat_count = 0; 
+            }
+        
+            if ($day_of_week == 6) {                       //if saturday match with day range and check 1 sat or 2 sat like in $saturday_check array
+                $sat_count++;
+                if (in_array($sat_count, $saturday_check)) {     //if match 1 sat or 2 sat or 3 sat - move to next date
+                    $start_date->add(new DateInterval('P1D'));          //move to next date
+                    continue;  
+                }
+            }
+        
+            if (!in_array($day_abbr, $day_check_allowed)) { // check for day like Sun or Sat and Mon . if not in day check allowed
+                $dates[] = $start_date->format('Y-m-d');        //add into array
+            }
+        
+            $start_date->add(new DateInterval('P1D'));    //move into next date
         }
+        
+        $dates_count = count($dates); //get count from $dates count for check data is insert are not
 
-        $dates_count = count($dates);
-
-        if ($dates_count > 1) {
+        if ($dates_count >= 2) {
 
 
             foreach ($dates as $date) {
 
-                $dateinsert = $date . PHP_EOL;
+                $dateinsert = $date . PHP_EOL;         //date create only date like 11/06/2000
 
+                if (!in_array($date,$formatted_check_dates) && $uploadOk == 1) {
 
-                if ($date != $skip_date->format('Y-m-d') && $uploadOk == 1) {
-                    //echo "---".$dateinsert."------".$notallowed."<br>";
-
-                    $sql = "INSERT INTO `taskmanager`( `event_id`,`message`, `startdate`, `enddate`, `notallowed`, `timing`, `colour`,`audio`,`audioname`) VALUES ('$event_id','$title','$dateinsert','$enddate','$notallowed','$timing','$colour','$targetFile','$filename')";
+                    $sql = "INSERT INTO `taskmanager`( `event_id`,`message`, `startdate`, `enddate`, `notallowed`, `timing`, `colour`, `days`,`audio`,`audioname`) VALUES ('$event_id','$title','$dateinsert','$enddate','$notallowed','$timing','$colour','$day_not_allowed','$targetFile','$filename')";
 
                     if (mysqli_query($conn, $sql)) {
 
                         ++$count_insert;
-                        //echo $count_insert."-";
                     } else {
-                        echo "Unable to Insert";
+
+                        echo "Something Went Wrong. Please Try again on Date";
+                        return;
                     }
-                } else {
-                    $dates_count -= 1;
                 }
             }
         } else {
 
-            $notallowed = "0000-00-00";
+            $notallowed = "";
 
-            $sql = "INSERT INTO `taskmanager`( `event_id`,`message`, `startdate`, `enddate`, `notallowed`, `timing`, `colour`,`audio`,`audioname`) VALUES ('$event_id','$title','$startdate','$enddate','$notallowed','$timing','$colour','$targetFile','$filename')";
+            $sql = "INSERT INTO `taskmanager`( `event_id`,`message`, `startdate`, `enddate`, `notallowed`, `timing`, `colour`, `days`,`audio`,`audioname`) VALUES ('$event_id','$title','$startdate','$enddate','$notallowed','$timing','$colour','$day_not_allowed','$targetFile','$filename')";
 
             if (mysqli_query($conn, $sql)) {
 
                 $count_insert = 1;
 
+                $uploadOk = 1;
 
-                echo $message . " and Successful Insert";
+                echo $message . " and Successfull";
+                unset($dates,$formatted_check_dates);
 
                 mysqli_close($conn);
 
                 return;
             } else {
 
-                echo "Unable to Insert Data";
+                echo "Something Went Wrong. Please Try again";
+                unset($dates,$formatted_check_dates);
+                return;
             }
         }
-
-
-        if ($count_insert == $dates_count) {
-
-            echo $message . " and Successful Insert";
-        } else {
-            //echo "@--".$count_insert."----".count($dates)."--@";
-
-            echo $message . " and Unable to Insert Datas";
-        }
-
         mysqli_close($conn);
+        if($uploadOk){
+            echo "New Schedule created successfully ";
+            unset($dates,$formatted_check_dates);
+        }
+       
     } else {
 
-        echo "Invalid data received";
+        echo "Please try again later.";
+        unset($dates,$formatted_check_dates);
     }
 }
 

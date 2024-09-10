@@ -22,11 +22,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         if (mysqli_query($conn, $sql)) {
 
-            echo "successfully Data delete";                            //--delete day on databse
+            echo "Successfully Day Delete";                            //--delete day on databse
 
         } else {
 
-            echo "unable to delete";
+            echo "Something Went Wrong On Delete Day";
         }
     }
     if (isset($_POST["eventid"]) && isset($_POST["delete_event_id"])) {        //-- delete fully event on database
@@ -51,17 +51,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         if (mysqli_query($conn, $sql) && $delete == 1) {
 
-            echo "successfully Data delete";
+            echo "Successfully Event Delete";
         } else {
 
-            echo "unable to delete";
+            echo "Something Went Wrong On Event Delete";
         }
     }
 
     mysqli_close($conn);
 } else {
 
-    echo "Invaild data";
+    echo "Something Went Wrong On Website";
 }
 
 ?>
