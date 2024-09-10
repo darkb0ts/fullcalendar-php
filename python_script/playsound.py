@@ -1,12 +1,13 @@
 import pygame
 import requests
 import time
-import RPi.GPIO as GPIO  # Assuming Raspberry Pi GPIO library
-
-default_audio = "/var/www/html/calendar/upload/school.mp3" #hardcore song
 dir_path = "/var/www/html/calendar"
+elapsed_time=0
+start_time = 0
+
 
 def get_data_from_api():
+    ''' this localhost api for playing audio in raspberry-pi '''
     try:
         response = requests.get('http://localhost/calendar/fetchapi.php')
         response.raise_for_status()
@@ -20,7 +21,7 @@ def get_data_from_api():
         print(f"Error: {e}")
         time.sleep(1)
 
-def play_audio(audio_path):
+def play_audio(self,audio_path):
     """Plays a specified audio file using Pygame mixer."""
     try:
         pygame.mixer.music.load(audio_path)
@@ -28,18 +29,13 @@ def play_audio(audio_path):
         print("Playing audio:", audio_path)
         while pygame.mixer.music.get_busy():
             pygame.time.wait(100)
+            elapsed_time = time.time() - self.start_time
     except Exception as e:
         print("Error playing audio:", audio_path, e)
 
 def main():
     pygame.init()
     pygame.mixer.init()
-
-    # Button setup (assuming Raspberry Pi GPIO)
-    button_pin = 17
-    GPIO.setmode(GPIO.BCM)
-    GPIO.setup(button_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-
     try:
         while True:
             # Check for API data
@@ -52,18 +48,10 @@ def main():
                     play_audio(str(dir_path)+audio_path)
                 time.sleep(30)  # Delay after playing API audio
 
-            # Check for button press
-            button_state = GPIO.input(button_pin)
-            if button_state == False:
-                print("Button pressed")
-                play_audio(default_audio)  # Replace with your desired button audio
-                time.sleep(0.2)  # Delay after playing button audio
-
     except KeyboardInterrupt:  # Handle program termination gracefully
         pass  # No cleanup needed for pygame in this case
 
     finally:
-        GPIO.cleanup()  # Cleanup GPIO pins (if applicable)
         pygame.quit()  # Quit Pygame
 
 if __name__ == '__main__':
